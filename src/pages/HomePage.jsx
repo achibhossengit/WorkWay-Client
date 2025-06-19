@@ -1,11 +1,17 @@
-import React from "react";
+import FilterSection from "../components/Home/FilterSection";
+import HotJobSection from "../components/Home/HotJobSection";
+import ServicesSection from "../components/Jobs/ServicesSection";
+import ReviewsSection from "../components/Jobs/ReviewsSection";
+import FAQSection from "../components/Jobs/FaqSection";
 
 const HomePage = () => {
   return (
     <div>
-      <p className="text-center font-bold text-red-500">
-        this is home page for showing all users!
-      </p>
+      <FilterSection/>
+      <HotJobSection/>
+      <ServicesSection/>
+      <ReviewsSection/>
+      <FAQSection/>
     </div>
   );
 };
