@@ -10,7 +10,7 @@ const HotJobSection = () => {
     setLoading(true);
     apiClient
       .get("jobs/")
-      .then((res) => setJobs(res.data))
+      .then((res) => setJobs(res.data.results))
       .catch((error) => console.log(error))
       .finally(()=>setLoading(false));
   }, []);
