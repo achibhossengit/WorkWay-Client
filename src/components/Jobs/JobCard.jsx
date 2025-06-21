@@ -1,27 +1,15 @@
-import React from "react";
+import { useState } from "react";
 import {
   FaBuilding,
   FaMapMarkerAlt,
   FaBriefcase,
   FaMoneyBillWave,
 } from "react-icons/fa";
+import JobDetailsModal from "./JobDetailsModal";
+import { formatSalary, getJobType } from "../Utilities/UtilityFunctions";
 
 const JobCard = ({ job }) => {
-  // Helper functions
-  const getJobType = (code) => {
-    switch (code) {
-      case "F":
-        return "Full-time";
-      case "P":
-        return "Part-time";
-      default:
-        return code;
-    }
-  };
-
-  const formatSalary = (amount) => {
-    return amount ? `৳${amount.toLocaleString()}/month` : "Salary negotiable";
-  };
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow p-5">
@@ -31,7 +19,7 @@ const JobCard = ({ job }) => {
         </div>
         <div>
           <h3 className="font-bold text-lg text-gray-800">{job.title}</h3>
-          <p className="text-gray-600">{job.employer}</p>
+          <p className="text-gray-600">{job.employer.username}</p>
         </div>
       </div>
 
@@ -50,9 +38,20 @@ const JobCard = ({ job }) => {
         </div>
       </div>
 
-      <button className="mt-4 w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors">
+      <button
+        className="mt-4 w-full cursor-pointer py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
+        onClick={() => setIsModalOpen(true)}
+      >
         View Details
       </button>
+
+      {/* Modal */}
+      {isModalOpen && (
+        <JobDetailsModal
+          job={job}
+          setIsModalOpen={setIsModalOpen}
+        ></JobDetailsModal>
+      )}
     </div>
   );
 };
