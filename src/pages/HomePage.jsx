@@ -1,8 +1,8 @@
 import FilterSection from "../components/Home/FilterSection";
 import HotJobSection from "../components/Home/HotJobSection";
-import ServicesSection from "../components/Jobs/ServicesSection";
-import ReviewsSection from "../components/Jobs/ReviewsSection";
-import FAQSection from "../components/Jobs/FaqSection";
+import ServicesSection from "../components/ServicesSection";
+import ReviewsSection from "../components/ReviewsSection";
+import FAQSection from "../components/FaqSection";
 import { useEffect, useState } from "react";
 import apiClient from "../services/ApiClient";
 
