@@ -1,6 +1,5 @@
-import React from "react";
 import TotalCards from "./TotalCards";
-import { FiSearch } from "react-icons/fi";
+import Filter from "../Filter/Filter";
 
 const demoCategories = [
   { id: 1, title: "General", description: "Various job categories" },
@@ -35,36 +34,7 @@ const FilterSection = ({ categories = demoCategories }) => {
 
         <TotalCards />
 
-        <form className="bg-indigo-950 rounded-lg shadow-xl p-4 sm:p-6">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1 relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <FiSearch className="text-gray-400" />
-              </div>
-              <input
-                type="text"
-                className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none"
-                placeholder="Job title, keywords, or company"
-              />
-            </div>
-
-            <select className="block w-full sm:w-64 px-3 py-3 border border-gray-300 rounded-md leading-5 bg-white focus:outline-none">
-              <option value="">All Categories</option>
-              {categories.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.title}
-                </option>
-              ))}
-            </select>
-
-            <button
-              type="submit"
-              className="px-6 py-3 cursor-pointer border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none duration-200"
-            >
-              Search Jobs
-            </button>
-          </div>
-        </form>
+        <Filter categories={categories}/>
       </div>
     </div>
   );
