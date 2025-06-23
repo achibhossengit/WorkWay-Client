@@ -3,21 +3,26 @@ import HotJobSection from "../components/Home/HotJobSection";
 import ServicesSection from "../components/Home/ServicesSection";
 import ReviewsSection from "../components/Home/ReviewsSection";
 import FAQSection from "../components/Home/FAQSection";
-import { useEffect, useState } from "react";
-import apiClient from "../services/ApiClient";
+import { useEffect } from "react";
+import useJobsCategories from "../hooks/useJobsCategories";
 
 const HomePage = () => {
-  const [categories, setCategories] = useState([]);
+  const {
+    jobs,
+    categories,
+    loading,
+    fetchJobs,
+    fetchCategories,
+  } = useJobsCategories();
+
   useEffect(() => {
-    apiClient
-      .get("categories/")
-      .then((res) => setCategories(res.data))
-      .catch((err) => console.log(err));
+    fetchCategories();
+    fetchJobs();
   }, []);
   return (
     <div>
       <FilterSection categories={categories} />
-      <HotJobSection />
+      <HotJobSection jobs={jobs} loading={loading}/>
       <ServicesSection />
       <ReviewsSection />
       <FAQSection />

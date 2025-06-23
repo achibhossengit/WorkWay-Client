@@ -1,19 +1,7 @@
-import { useEffect, useState } from "react";
 import JobsContainer from "../Jobs/JobsContainer";
-import apiClient from "../../services/ApiClient";
 import Spinner from "../Utilities/Spinner";
 
-const HotJobSection = () => {
-  const [jobs, setJobs] = useState([]);
-  const [loading, setLoading] = useState(false);
-  useEffect(() => {
-    setLoading(true);
-    apiClient
-      .get("jobs/")
-      .then((res) => setJobs(res.data.results))
-      .catch((error) => console.log(error))
-      .finally(()=>setLoading(false));
-  }, []);
+const HotJobSection = ({jobs, loading}) => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div>

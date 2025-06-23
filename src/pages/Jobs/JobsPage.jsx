@@ -1,44 +1,28 @@
-import { useEffect, useState } from "react";
-import apiClient from "../../services/ApiClient";
 import JobsContainer from "../../components/Jobs/JobsContainer";
 import Spinner from "../../components/Utilities/Spinner";
 import Filter from "../../components/Filter/Filter";
+import useJobsCategories from "../../hooks/useJobsCategories";
 
 const JobsPage = () => {
-  const [jobs, setJobs] = useState([]);
-  const [categories, setCategories] = useState([])
-  const [totalPage, setTotalPage] = useState(1);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [loading, setLoading] = useState(false);
-  useEffect(() => {
-    apiClient.get('categories').then(res=>setCategories(res.data))
-    const fetchJobs = async () => {
-      setLoading(true);
-      try {
-        const res = await apiClient.get(`jobs/?page=${currentPage}`);
-        if (res) {
-          setJobs(res.data.results);
-          setTotalPage(Math.ceil(res.data.count / 10));
-        }
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchJobs();
-  }, [currentPage]);
-  const handleCurrentPage = (page) => {
-    setCurrentPage(page);
-  };
+  const {
+    jobs,
+    categories,
+    loading,
+    totalPage,
+    currentPage,
+    handleCurrentPage,
+  } = useJobsCategories();
+
   return (
     <div className="my-10 space-y-10">
       <div>
-        <Filter categories={categories}/>
+        <Filter categories={categories} />
       </div>
       <div>
         {loading ? (
           <Spinner title="Loading jobs.." />
+        ) : jobs.length === 0 ? (
+          <div className="text-xl font-bold text-center">No jobs found!</div>
         ) : (
           <JobsContainer jobs={jobs} />
         )}
