@@ -3,7 +3,6 @@ import HotJobSection from "../components/Home/HotJobSection";
 import ServicesSection from "../components/Home/ServicesSection";
 import ReviewsSection from "../components/Home/ReviewsSection";
 import FAQSection from "../components/Home/FAQSection";
-import { useEffect } from "react";
 import useJobsCategories from "../hooks/useJobsCategories";
 
 const HomePage = () => {
@@ -11,17 +10,11 @@ const HomePage = () => {
     jobs,
     categories,
     loading,
-    fetchJobs,
-    fetchCategories,
+    handleSearch,
   } = useJobsCategories();
-
-  useEffect(() => {
-    fetchCategories();
-    fetchJobs();
-  }, []);
   return (
     <div>
-      <FilterSection categories={categories} />
+      <FilterSection categories={categories} handleSearch={handleSearch}/>
       <HotJobSection jobs={jobs} loading={loading}/>
       <ServicesSection />
       <ReviewsSection />

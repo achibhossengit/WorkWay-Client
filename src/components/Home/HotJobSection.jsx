@@ -1,3 +1,4 @@
+import { Link } from "react-router";
 import JobsContainer from "../Jobs/JobsContainer";
 import Spinner from "../Utilities/Spinner";
 
@@ -19,9 +20,9 @@ const HotJobSection = ({jobs, loading}) => {
         <JobsContainer jobs={jobs}/>
       )}
       <div className="mt-10 text-center">
-        <button className="px-6 py-2 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-50 transition-colors">
+        <Link to={'/jobs'} className="px-6 py-2 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-50 transition-colors">
           Load More Jobs
-        </button>
+        </Link>
       </div>
     </div>
   );

@@ -5,13 +5,14 @@ const useJobsCategories = () => {
   const [jobs, setJobs] = useState([]);
   const [totalPage, setTotalPage] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
+  const [currentCategory, setCurrentCategory] = useState("");
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const fetchJobs = async () => {
     setLoading(true);
     try {
-      const res = await apiClient.get(`jobs/?page=${currentPage}`);
+      const res = await apiClient.get(`jobs/?page=${currentPage}&category=${currentCategory}`);
       if (res) {
         setJobs(res.data.results);
         setTotalPage(Math.ceil(res.data.count / 10));
@@ -40,10 +41,17 @@ const useJobsCategories = () => {
     setCurrentPage(page);
   };
 
+  const handleSearch =(e)=>{
+    e.preventDefault();
+    const category = e.target.category.value;
+    setCurrentCategory(category)
+    console.log(category);
+  }
+
   useEffect(() => {
     fetchJobs();
     fetchCategories();
-  }, [currentPage]);
+  }, [currentPage, currentCategory]);
 
   return {
     jobs,
@@ -54,6 +62,7 @@ const useJobsCategories = () => {
     fetchJobs,
     fetchCategories,
     handleCurrentPage,
+    handleSearch
   };
 };
 

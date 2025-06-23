@@ -11,12 +11,13 @@ const JobsPage = () => {
     totalPage,
     currentPage,
     handleCurrentPage,
+    handleSearch,
   } = useJobsCategories();
 
   return (
     <div className="my-10 space-y-10">
       <div>
-        <Filter categories={categories} />
+        <Filter categories={categories} handleSearch={handleSearch}/>
       </div>
       <div>
         {loading ? (

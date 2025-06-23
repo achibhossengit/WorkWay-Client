@@ -1,19 +1,7 @@
 import TotalCards from "./TotalCards";
 import Filter from "../Filter/Filter";
 
-const demoCategories = [
-  { id: 1, title: "General", description: "Various job categories" },
-  { id: 2, title: "Doctors", description: "Medical professionals" },
-  { id: 3, title: "Salesman", description: "Sales and marketing roles" },
-  {
-    id: 4,
-    title: "Engineering",
-    description: "Technical and engineering jobs",
-  },
-  { id: 5, title: "Education", description: "Teaching and academic positions" },
-];
-
-const FilterSection = ({ categories = demoCategories }) => {
+const FilterSection = ({ categories, handleSearch }) => {
   return (
     <div
       className="w-full bg-cover bg-center"
@@ -34,7 +22,7 @@ const FilterSection = ({ categories = demoCategories }) => {
 
         <TotalCards />
 
-        <Filter categories={categories}/>
+        <Filter categories={categories} handleSearch={handleSearch}/>
       </div>
     </div>
   );
