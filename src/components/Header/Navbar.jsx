@@ -5,7 +5,10 @@ import {
   FaUser,
   FaCog,
   FaSignOutAlt,
+  FaSignInAlt,
+  FaUserPlus,
 } from "react-icons/fa";
+import { NavLink } from "react-router";
 
 const links = [
   { title: "Home", path: "/", icon: <FaHome /> },
@@ -14,8 +17,8 @@ const links = [
 ];
 
 const userMenu = [
-  { title: "Profile", path: "/profile", icon: <FaUser /> },
-  { title: "Settings", path: "/settings", icon: <FaCog /> },
+  { title: "Dashboard", path: "/dashboard", icon: <FaHome /> },
+  { title: "Profile", path: "/dashboard/profile", icon: <FaUser /> },
   { title: "Logout", path: "/logout", icon: <FaSignOutAlt /> },
 ];
 
@@ -92,6 +95,23 @@ const Navbar = () => {
               </li>
             ))}
           </ul>
+        </div>
+        <div className="flex gap-4">
+          <NavLink
+            to="/register"
+            className="flex items-center btn px-4 py-2 rounded-lg font-medium text-blue-600 bg-white hover:bg-gray-50 transition-colors duration-200 shadow-sm hover:shadow-md border border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
+            <FaUserPlus className="mr-2" />
+            Sign Up
+          </NavLink>
+          <NavLink
+            to="/login"
+            className="flex items-center btn btn-primary px-4 py-2 rounded-lg font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200 shadow-sm hover:shadow-md border border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
+            <FaSignInAlt className="mr-2" />
+            Sign In
+          </NavLink>
+          
         </div>
       </div>
     </div>
