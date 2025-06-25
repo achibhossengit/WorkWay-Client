@@ -8,6 +8,7 @@ import SignUp from "../pages/SignUp/SignUp";
 import DashboardLayout from "../pages/Layouts/DashboardLayout";
 import Dashboard from "../pages/DashBoard/Dashboard";
 import Profile from "../pages/DashBoard/Profile";
+import PrivateRoutes from "./PrivateRoutes";
 
 const AppRoutes = () => {
   return (
@@ -17,7 +18,14 @@ const AppRoutes = () => {
         <Route path="jobs" element={<JobsPage />} />
         <Route path="login" element={<Login />} />
         <Route path="register" element={<SignUp />} />
-        <Route path="dashboard" element={<DashboardLayout />}>
+        <Route
+          path="dashboard"
+          element={
+            <PrivateRoutes>
+              <DashboardLayout />
+            </PrivateRoutes>
+          }
+        >
           <Route index element={<Dashboard />} />
           <Route path="profile" element={<Profile />} />
         </Route>
