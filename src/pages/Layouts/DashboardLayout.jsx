@@ -1,8 +1,8 @@
 import { Outlet } from "react-router";
 
-import { useState } from "react";
 import { MdArrowBackIos, MdArrowForwardIos } from "react-icons/md";
 import Sidebar from "../../components/Footer/Sidebar";
+import { useState } from "react";
 
 const DashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);

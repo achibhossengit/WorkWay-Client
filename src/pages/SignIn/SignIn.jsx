@@ -1,30 +1,24 @@
-import React from "react";
+import { useContext, useState } from "react";
 import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
 import { FaUser, FaLock, FaSignInAlt } from "react-icons/fa";
-import { Link } from "react-router";
-
-const schema = yup.object().shape({
-  email: yup.string().email("Invalid email").required("Email is required"),
-  password: yup
-    .string()
-    .min(8, "Password must be at least 8 characters")
-    .required("Password is required"),
-});
+import { Link, useNavigate } from "react-router";
+import { AuthContext } from "../../context/authContext";
 
 const SignIn = () => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
-    resolver: yupResolver(schema),
-  });
+  const navigate = useNavigate();
+  const { login } = useContext(AuthContext);
+  const { register, handleSubmit } = useForm();
+  const [loginError, setLoginError] = useState(null);
 
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
     console.log(data);
-    // Handle login logic
+    const res = await login(data);
+    console.log(res);
+    if (res?.success) {
+      navigate("/dashboard");
+    } else {
+      setLoginError("Something went Wrong! Try Again");
+    }
   };
 
   return (
@@ -34,36 +28,33 @@ const SignIn = () => {
           <h2 className="text-3xl font-bold text-white">Welcome Back</h2>
           <p className="text-blue-100 mt-1">Sign in to access your account</p>
         </div>
-
+        {loginError && (
+          <div role="alert" className="alert alert-error alert-soft">
+            <span>{loginError}</span>
+          </div>
+        )}
         <div className="p-8">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div>
               <label
-                htmlFor="email"
+                htmlFor="username"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Email
+                Username
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <FaUser className="text-gray-400" />
                 </div>
                 <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  {...register("email")}
-                  className={`block w-full pl-10 pr-3 py-3 border ${
-                    errors.email ? "border-red-500" : "border-gray-300"
-                  } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
-                  placeholder="your@email.com"
+                  type="text"
+                  required
+                  value={"rakib"}
+                  {...register("username")}
+                  className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+                  placeholder="your username"
                 />
               </div>
-              {errors.email && (
-                <p className="mt-1 text-sm text-red-600">
-                  {errors.email.message}
-                </p>
-              )}
             </div>
 
             <div>
@@ -78,21 +69,15 @@ const SignIn = () => {
                   <FaLock className="text-gray-400" />
                 </div>
                 <input
-                  id="password"
-                  name="password"
                   type="password"
+                  value={"hello@user"}
+                  required
+                  minLength={4}
                   {...register("password")}
-                  className={`block w-full pl-10 pr-3 py-3 border ${
-                    errors.password ? "border-red-500" : "border-gray-300"
-                  } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
-                  placeholder="••••••••"
+                  className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+                  placeholder="Enter your password"
                 />
               </div>
-              {errors.password && (
-                <p className="mt-1 text-sm text-red-600">
-                  {errors.password.message}
-                </p>
-              )}
             </div>
 
             <div className="flex items-center justify-between">
