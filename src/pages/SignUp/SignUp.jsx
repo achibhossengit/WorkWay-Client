@@ -1,12 +1,14 @@
 import { Link, useNavigate } from "react-router";
+import { useState } from "react";
+import { toast } from "react-toastify";
 import apiClient from "../../services/ApiClient";
 import SignUpForm from "./SignUpForm";
-import { toast } from "react-toastify";
-import { useState } from "react";
+import ActivationPopUp from "./ActivationPopUp";
 
 const SignUp = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const onSubmit = async (data) => {
     setLoading(true);
@@ -14,7 +16,7 @@ const SignUp = () => {
     try {
       const res = await apiClient.post("auth/users/", data);
       if (res) {
-        navigate("/login");
+        setIsModalOpen(true); // Open the activation popup
       }
     } catch (error) {
       console.error("Error Occurred:", error.response?.data || error.message);
@@ -29,6 +31,18 @@ const SignUp = () => {
     }
   };
 
+  const handleShowEmail = () => {
+    window.open("https://mail.google.com", "_blank");
+  };
+
+  const handleLogin = () => {
+    navigate("/login");
+  };
+
+  const handleClose = () => {
+    setIsModalOpen(false);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-gray-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-white rounded-xl shadow-lg overflow-hidden">
@@ -37,10 +51,10 @@ const SignUp = () => {
           <p className="text-blue-100 mt-1">Join our platform today</p>
         </div>
         <div className="p-8">
-          <SignUpForm onSubmit={onSubmit} loading={loading}/>
+          <SignUpForm onSubmit={onSubmit} loading={loading} />
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
-              Already have an account?
+              Already have an account?{" "}
               <Link
                 to="/login"
                 className="font-medium text-blue-600 hover:text-blue-500 cursor-pointer"
@@ -51,6 +65,12 @@ const SignUp = () => {
           </div>
         </div>
       </div>
+      <ActivationPopUp
+        isOpen={isModalOpen}
+        onShowEmail={handleShowEmail}
+        onLogin={handleLogin}
+        onClose={handleClose}
+      />
     </div>
   );
 };

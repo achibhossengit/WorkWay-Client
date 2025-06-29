@@ -1,23 +1,36 @@
-import { useContext, useState } from "react";
+import { useContext } from "react";
 import { useForm } from "react-hook-form";
 import { FaUser, FaLock, FaSignInAlt } from "react-icons/fa";
 import { Link, useNavigate } from "react-router";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { AuthContext } from "../../context/authContext";
 
 const SignIn = () => {
   const navigate = useNavigate();
   const { login } = useContext(AuthContext);
   const { register, handleSubmit } = useForm();
-  const [loginError, setLoginError] = useState(null);
 
   const onSubmit = async (data) => {
-    console.log(data);
-    const res = await login(data);
-    console.log(res);
-    if (res?.success) {
-      navigate("/dashboard");
-    } else {
-      setLoginError("Something went Wrong! Try Again");
+    try {
+      const res = await login(data);
+      if (res?.success) {
+        toast.success("Login successful!", {
+          autoClose: 3000,
+        });
+        navigate("/dashboard");
+      } else {
+        throw new Error("Invalid credentials. Please try again.");
+      }
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.detail ||
+        error.message ||
+        "An unexpected error occurred.";
+      toast.error(errorMessage, {
+        position: "top-center",
+        autoClose: 3000,
+      });
     }
   };
 
@@ -28,11 +41,6 @@ const SignIn = () => {
           <h2 className="text-3xl font-bold text-white">Welcome Back</h2>
           <p className="text-blue-100 mt-1">Sign in to access your account</p>
         </div>
-        {loginError && (
-          <div role="alert" className="alert alert-error alert-soft">
-            <span>{loginError}</span>
-          </div>
-        )}
         <div className="p-8">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div>
@@ -49,9 +57,8 @@ const SignIn = () => {
                 <input
                   type="text"
                   required
-                  value={"rakib"}
                   {...register("username")}
-                  className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+                  className="block w-full pl-10 pr-3 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="your username"
                 />
               </div>
@@ -70,11 +77,10 @@ const SignIn = () => {
                 </div>
                 <input
                   type="password"
-                  value={"hello@user"}
                   required
                   minLength={4}
                   {...register("password")}
-                  className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+                  className="block w-full pl-10 pr-3 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Enter your password"
                 />
               </div>

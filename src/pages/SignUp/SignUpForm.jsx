@@ -164,6 +164,7 @@ const SignUpForm = ({ onSubmit, loading }) => {
               id="password"
               name="password"
               type="password"
+              value={'Hello@user1'}
               {...register("password", {
                 required: "Password is required",
                 minLength: {
@@ -207,6 +208,7 @@ const SignUpForm = ({ onSubmit, loading }) => {
               id="confirmPassword"
               name="confirmPassword"
               type="password"
+              value={'Hello@user1'}
               {...register("confirmPassword", {
                 required: "Please confirm your password",
                 validate: (value) =>

@@ -9,6 +9,7 @@ import DashboardLayout from "../pages/Layouts/DashboardLayout";
 import Dashboard from "../pages/DashBoard/Dashboard";
 import Profile from "../pages/DashBoard/Profile";
 import PrivateRoutes from "./PrivateRoutes";
+import Activation from "../pages/SignUp/Activation";
 
 const AppRoutes = () => {
   return (
@@ -18,6 +19,7 @@ const AppRoutes = () => {
         <Route path="jobs" element={<JobsPage />} />
         <Route path="login" element={<Login />} />
         <Route path="register" element={<SignUp />} />
+        <Route path="activate/:uid/:token" element={<Activation />} />
         <Route
           path="dashboard"
           element={
