@@ -10,6 +10,7 @@ import Dashboard from "../pages/DashBoard/Dashboard";
 import Profile from "../pages/DashBoard/Profile";
 import PrivateRoutes from "./PrivateRoutes";
 import Activation from "../pages/SignUp/Activation";
+import PasswordReset from "../pages/SignIn/PasswordReset";
 
 const AppRoutes = () => {
   return (
@@ -20,6 +21,7 @@ const AppRoutes = () => {
         <Route path="login" element={<Login />} />
         <Route path="register" element={<SignUp />} />
         <Route path="activate/:uid/:token" element={<Activation />} />
+        <Route path="password/reset/confirm/:uid/:token" element={<PasswordReset />} />
         <Route
           path="dashboard"
           element={

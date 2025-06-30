@@ -1,6 +1,6 @@
 import { FaTimes } from "react-icons/fa";
 
-const ActivationPopUp = ({ isOpen, onClose, onShowEmail, onLogin }) => {
+const ActivationPopUp = ({ isOpen, onShowEmail, onLogin }) => {
   if (!isOpen) return null;
 
   return (
@@ -9,14 +9,6 @@ const ActivationPopUp = ({ isOpen, onClose, onShowEmail, onLogin }) => {
       aria-hidden={!isOpen}
     >
       <div className="relative bg-white rounded-lg shadow-2xl max-w-md w-full p-6">
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          className="absolute cursor-pointer top-2 right-2 text-gray-400 hover:text-gray-600 transition"
-        >
-          <FaTimes size={20} />
-        </button>
-
         {/* Modal Content */}
         <div className="text-center">
           <h1 className="text-2xl font-bold text-blue-700 mb-4">
