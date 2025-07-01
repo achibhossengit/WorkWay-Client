@@ -1,127 +1,206 @@
-import React from "react";
+import { useContext } from "react";
 import {
-  FaUser,
   FaEnvelope,
   FaPhone,
   FaMapMarkerAlt,
-  FaBriefcase,
-  FaCalendarAlt,
   FaEdit,
+  FaUserTie,
+  FaBuilding,
 } from "react-icons/fa";
+import { AuthContext } from "../../context/authContext";
 
 const Profile = () => {
-  // Sample user data
-  const user = {
-    name: "John Doe",
-    email: "john.doe@example.com",
-    phone: "+1 (555) 123-4567",
-    location: "New York, USA",
-    position: "Senior UI Developer",
-    joined: "15 March 2020",
-    bio: "Passionate developer with 5+ years of experience in building beautiful and functional user interfaces. Specialized in React and design systems.",
-    skills: ["React", "JavaScript", "UI/UX Design", "Tailwind CSS", "Node.js"],
-    avatar: "https://randomuser.me/api/portraits/men/1.jpg",
-  };
+  const { user } = useContext(AuthContext);
 
   return (
-    <div className="p-6">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Profile Card */}
-        <div className="bg-white rounded-xl shadow-md overflow-hidden lg:col-span-1">
-          <div className="bg-blue-600 h-24"></div>
-          <div className="px-6 pb-6 relative">
-            <div className="flex justify-center -mt-12 mb-4">
+    <div className="min-h-screen bg-gray-50 py-10 px-4">
+      {user && (
+        <div className="max-w-7xl mx-auto grid grid-cols-1 xl:grid-cols-4 gap-6">
+          {/* Left Sidebar - Profile Card */}
+          <div className="bg-white rounded-xl shadow-md overflow-hidden xl:col-span-1 flex flex-col items-center p-6 border border-gray-200">
+            {/* Profile Image */}
+            <div className="relative mb-4">
               <img
-                src={user.avatar}
+                src={user.profile_picture || "/placeholder.png"}
                 alt="Profile"
-                className="h-24 w-24 rounded-full border-4 border-white object-cover"
+                className="h-32 w-32 rounded-full border-4 border-blue-500 object-cover"
               />
-            </div>
-            <div className="text-center mb-6">
-              <h2 className="text-xl font-bold text-gray-800">{user.name}</h2>
-              <p className="text-gray-600">{user.position}</p>
+              <div className="absolute -bottom-2 right-2 bg-blue-500 text-white p-2 rounded-full">
+                {user.user_type === "Jobseeker" ? (
+                  <FaUserTie size={16} />
+                ) : (
+                  <FaBuilding size={16} />
+                )}
+              </div>
             </div>
 
-            <div className="space-y-4">
-              <div className="flex items-center">
-                <FaEnvelope className="text-gray-400 mr-3" />
-                <span className="text-gray-700">{user.email}</span>
-              </div>
-              <div className="flex items-center">
-                <FaPhone className="text-gray-400 mr-3" />
-                <span className="text-gray-700">{user.phone}</span>
-              </div>
-              <div className="flex items-center">
-                <FaMapMarkerAlt className="text-gray-400 mr-3" />
-                <span className="text-gray-700">{user.location}</span>
-              </div>
-              <div className="flex items-center">
-                <FaCalendarAlt className="text-gray-400 mr-3" />
-                <span className="text-gray-700">Joined {user.joined}</span>
-              </div>
-            </div>
-            <div className="mt-10 flex justify-center">
-              <button className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                <FaEdit className="mr-2" />
-                Edit Profile
-              </button>
-            </div>
-          </div>
-        </div>
-        {/* Details Section */}
-        <div className="bg-white rounded-xl shadow-md overflow-hidden lg:col-span-2 p-6">
-          <div className="mb-8">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">
-              About
-            </h3>
-            <p className="text-gray-700">{user.bio}</p>
-          </div>
+            {/* User Name */}
+            <h2 className="text-xl font-bold text-gray-800 mb-1">
+              {user.first_name || user.last_name
+                ? user.first_name + " " + user.last_name
+                : "Not Found"}
+            </h2>
 
-          <div className="mb-8">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">
-              Skills
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {user.skills.map((skill, index) => (
-                <span
-                  key={index}
-                  className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-sm"
-                >
-                  {skill}
+            {/* User Role */}
+            <p className="text-blue-600 font-medium mb-4">
+              {user.user_type === "Employer"
+                ? user.employer?.company || "Not found"
+                : `${user.jobseeker?.gender || "Not found"} • ${
+                    user.jobseeker?.experiences || 0
+                  } yrs exp`}
+            </p>
+
+            {/* Contact Information */}
+            <div className="space-y-3 w-full mb-4">
+              <div className="flex items-center">
+                <FaEnvelope className="text-blue-400 mr-3" size={14} />
+                <span className="text-gray-700 text-sm">
+                  {user.email || "Not found"}
                 </span>
-              ))}
+              </div>
+              <div className="flex items-center">
+                <FaPhone className="text-blue-400 mr-3" size={14} />
+                <span className="text-gray-700 text-sm">
+                  {user.contact_number || "Not found"}
+                </span>
+              </div>
+              <div className="flex items-center">
+                <FaMapMarkerAlt className="text-blue-400 mr-3" size={14} />
+                <span className="text-gray-700 text-sm">
+                  {user.user_type === "Employer"
+                    ? user.employer?.location || "Not found"
+                    : user.jobseeker?.current_address || "Not found"}
+                </span>
+              </div>
             </div>
+
+            {/* Edit Button */}
+            <button className="mt-2 w-full flex items-center justify-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium">
+              <FaEdit className="mr-2" size={14} />
+              Edit Profile
+            </button>
           </div>
 
-          <div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">
-              Activity
-            </h3>
-            <div className="space-y-4">
-              <div className="flex items-start">
-                <div className="bg-blue-100 p-2 rounded-full mr-3">
-                  <FaBriefcase className="text-blue-600" />
-                </div>
-                <div>
-                  <p className="font-medium text-gray-800">
-                    Applied for Senior React Developer
-                  </p>
-                  <p className="text-sm text-gray-500">2 days ago</p>
-                </div>
-              </div>
-              <div className="flex items-start">
-                <div className="bg-green-100 p-2 rounded-full mr-3">
-                  <FaUser className="text-green-600" />
-                </div>
-                <div>
-                  <p className="font-medium text-gray-800">Profile updated</p>
-                  <p className="text-sm text-gray-500">1 week ago</p>
-                </div>
-              </div>
+          {/* Main Content */}
+          <div className="xl:col-span-3 space-y-6">
+            {/* About Section */}
+            <div className="bg-white rounded-xl shadow-md overflow-hidden p-6 border border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-300 flex items-center">
+                <span className="bg-blue-500 text-white p-2 rounded-lg mr-3">
+                  {user.user_type === "Jobseeker" ? (
+                    <FaUserTie size={16} />
+                  ) : (
+                    <FaBuilding size={16} />
+                  )}
+                </span>
+                {user.user_type === "Jobseeker"
+                  ? "About Me"
+                  : "Company Overview"}
+              </h3>
+              <p className="text-gray-700">
+                {user.user_type === "Jobseeker"
+                  ? user.jobseeker?.about || "Not found"
+                  : user.employer?.description || "Not found"}
+              </p>
             </div>
+
+            {/* Conditional Sections */}
+            {user.user_type === "Jobseeker" ? (
+              <>
+                {/* Skills Section */}
+                <div className="bg-white rounded-xl shadow-md overflow-hidden p-6 border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-300">
+                    Skills & Expertise
+                  </h3>
+                  <div className="flex flex-wrap gap-3">
+                    {user.jobseeker?.skills?.length > 0 ? (
+                      user.jobseeker.skills.map((skill, index) => (
+                        <span
+                          key={index}
+                          className="px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-sm font-medium"
+                        >
+                          {skill}
+                        </span>
+                      ))
+                    ) : (
+                      <p className="text-gray-500 text-sm">Not found</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Resume Section */}
+                <div className="bg-white rounded-xl shadow-md overflow-hidden p-6 border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-300">
+                    Resume
+                  </h3>
+                  <div className="flex items-center gap-4">
+                    {user.jobseeker?.resume ? (
+                      <a
+                        href={user.jobseeker.resume}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm font-medium"
+                      >
+                        View Resume
+                      </a>
+                    ) : (
+                      <p className="text-gray-500 text-sm">Not found</p>
+                    )}
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Employer Details */}
+                <div className="bg-white rounded-xl shadow-md overflow-hidden p-6 border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-300">
+                    Company Information
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <h4 className="font-medium text-gray-700 mb-1">
+                        Company Name
+                      </h4>
+                      <p className="text-gray-900">
+                        {user.employer?.company || "Not found"}
+                      </p>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-gray-700 mb-1">
+                        Location
+                      </h4>
+                      <p className="text-gray-900">
+                        {user.employer?.location || "Not found"}
+                      </p>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-gray-700 mb-1">
+                        Website
+                      </h4>
+                      <a
+                        href={
+                          user.employer?.website
+                            ? `https://${user.employer.website}`
+                            : "#"
+                        }
+                        className={`${
+                          user.employer?.website
+                            ? "text-blue-500 hover:underline"
+                            : "text-gray-500 cursor-not-allowed"
+                        }`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {user.employer?.website || "Not found"}
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
