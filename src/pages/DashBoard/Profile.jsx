@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import {
   FaEnvelope,
   FaPhone,
@@ -8,9 +8,17 @@ import {
   FaBuilding,
 } from "react-icons/fa";
 import { AuthContext } from "../../context/authContext";
+import UpdateProfileModal from "./UpdateProfileModal";
 
 const Profile = () => {
   const { user } = useContext(AuthContext);
+  const [openModal, setOpenModal] = useState(false)
+
+  const handleUpdate = (userData)=> {
+    console.log(userData);
+    console.log('i am clickedd');
+
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-10 px-4">
@@ -75,7 +83,7 @@ const Profile = () => {
             </div>
 
             {/* Edit Button */}
-            <button className="mt-2 w-full flex items-center justify-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium">
+            <button onClick={()=> setOpenModal(true)} className="mt-2 w-full flex items-center justify-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium">
               <FaEdit className="mr-2" size={14} />
               Edit Profile
             </button>
@@ -200,6 +208,15 @@ const Profile = () => {
             )}
           </div>
         </div>
+      )}
+
+      {openModal && (
+        <UpdateProfileModal
+          user={user}
+          openModal={openModal}
+          handleClose={() => setOpenModal(false)}
+          handleUpdate={handleUpdate}
+        />
       )}
     </div>
   );
