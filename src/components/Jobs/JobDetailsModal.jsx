@@ -17,12 +17,25 @@ import {
 import { AuthContext } from "../../context/authContext";
 import apiClient from "../../services/ApiClient";
 
-const JobDetailsModal = ({ job, setIsModalOpen }) => {
+const STATUS_LABELS = {
+  P: "Pending",
+  R: "Reviewed",
+  A: "Accept",
+};
+
+const JobDetailsModal = ({
+  job,
+  setIsModalOpen,
+  application,
+  onCancelApplication,
+  cancelling,
+}) => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
   const [applying, setApplying] = useState(false);
   const [applied, setApplied] = useState(false);
   const isEmployer = user?.user_type === "Employer";
+  const hasApplied = Boolean(application) || applied;
 
   const handleApply = async () => {
     if (!user) {
@@ -73,10 +86,18 @@ const JobDetailsModal = ({ job, setIsModalOpen }) => {
               </p>
             </div>
             <div className="flex flex-col items-end gap-2">
-              <span className="badge badge-primary">{job.category.title}</span>
+              <span className="badge badge-primary">{job.category?.title}</span>
               <div className="badge badge-outline">
                 {getJobType(job.details?.status)}
               </div>
+              {application && (
+                <span className="badge badge-ghost">
+                  {STATUS_LABELS[application.status] || application.status}
+                  {application.applied_at
+                    ? ` • ${formatDate(application.applied_at)}`
+                    : ""}
+                </span>
+              )}
             </div>
           </div>
 
@@ -156,7 +177,10 @@ const JobDetailsModal = ({ job, setIsModalOpen }) => {
               </div>
 
               <div className="flex flex-wrap gap-2 mt-2">
-                {job.requirements.skill.split(", ").map((skill, index) => (
+                {(job.requirements?.skill || "")
+                  .split(", ")
+                  .filter(Boolean)
+                  .map((skill, index) => (
                   <span
                     key={index}
                     className="badge badge-outline py-2 px-3 rounded-lg"
@@ -176,15 +200,26 @@ const JobDetailsModal = ({ job, setIsModalOpen }) => {
             >
               Close
             </button>
-            {!isEmployer && (
+            {application ? (
               <button
                 type="button"
-                onClick={handleApply}
-                disabled={applying || applied}
-                className="btn btn-primary px-6 bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-60"
+                onClick={() => onCancelApplication?.(application.id)}
+                disabled={cancelling}
+                className="btn px-6 bg-red-600 hover:bg-red-700 border-red-600 text-white disabled:opacity-60"
               >
-                {applied ? "Applied" : applying ? "Applying..." : "Apply Now"}
+                {cancelling ? "Cancelling..." : "Cancel application"}
               </button>
+            ) : (
+              !isEmployer && (
+                <button
+                  type="button"
+                  onClick={handleApply}
+                  disabled={applying || hasApplied}
+                  className="btn btn-primary px-6 bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-60"
+                >
+                  {hasApplied ? "Applied" : applying ? "Applying..." : "Apply Now"}
+                </button>
+              )
             )}
           </div>
         </div>
