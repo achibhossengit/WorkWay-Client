@@ -10,12 +10,14 @@ const STATUS_LABELS = {
   P: "Pending",
   R: "Reviewed",
   A: "Accept",
+  C: "Cancelled",
 };
 
 const STATUS_STYLES = {
   P: "bg-amber-100 text-amber-800",
   R: "bg-blue-100 text-blue-800",
   A: "bg-green-100 text-green-800",
+  C: "bg-rose-100 text-rose-800",
 };
 
 const MyApplications = () => {
@@ -64,16 +66,36 @@ const MyApplications = () => {
     }
   };
 
+  const handleReapply = (updatedApplication) => {
+    setApplications((current) =>
+      current.map((application) =>
+        application.id === updatedApplication.id
+          ? { ...application, ...updatedApplication }
+          : application
+      )
+    );
+    setSelectedApplication((current) =>
+      current?.id === updatedApplication.id
+        ? { ...current, ...updatedApplication }
+        : current
+    );
+  };
+
   const handleCancel = async (applicationId) => {
     if (!window.confirm("Cancel this application?")) return;
 
     setCancelling(true);
     try {
-      await apiClient.delete(
-        `jobseekers/${user.id}/applications/${applicationId}/`
+      await apiClient.patch(
+        `jobseekers/${user.id}/applications/${applicationId}/`,
+        { status: "C" }
       );
       setApplications((current) =>
-        current.filter((application) => application.id !== applicationId)
+        current.map((application) =>
+          application.id === applicationId
+            ? { ...application, status: "C" }
+            : application
+        )
       );
       closeModal();
       toast.success("Application cancelled.");
@@ -152,6 +174,7 @@ const MyApplications = () => {
           setIsModalOpen={closeModal}
           application={selectedApplication}
           onCancelApplication={handleCancel}
+          onReapplyApplication={handleReapply}
           cancelling={cancelling}
         />
       )}

@@ -21,6 +21,7 @@ const STATUS_LABELS = {
   P: "Pending",
   R: "Reviewed",
   A: "Accept",
+  C: "Cancelled",
 };
 
 const JobDetailsModal = ({
@@ -28,6 +29,7 @@ const JobDetailsModal = ({
   setIsModalOpen,
   application,
   onCancelApplication,
+  onReapplyApplication,
   cancelling,
 }) => {
   const { user } = useContext(AuthContext);
@@ -35,7 +37,9 @@ const JobDetailsModal = ({
   const [applying, setApplying] = useState(false);
   const [applied, setApplied] = useState(false);
   const isEmployer = user?.user_type === "Employer";
-  const hasApplied = Boolean(application) || applied;
+  const isCancelled = application?.status === "C";
+  const canCancel = Boolean(application) && !isCancelled;
+  const hasApplied = canCancel || applied;
 
   const handleApply = async () => {
     if (!user) {
@@ -45,10 +49,11 @@ const JobDetailsModal = ({
 
     setApplying(true);
     try {
-      await apiClient.post(`jobseekers/${user.id}/applications/`, {
+      const res = await apiClient.post(`jobseekers/${user.id}/applications/`, {
         job: job.id,
       });
       setApplied(true);
+      onReapplyApplication?.(res.data);
       toast.success("Application submitted successfully.");
     } catch (error) {
       const data = error.response?.data;
@@ -200,7 +205,7 @@ const JobDetailsModal = ({
             >
               Close
             </button>
-            {application ? (
+            {canCancel ? (
               <button
                 type="button"
                 onClick={() => onCancelApplication?.(application.id)}
