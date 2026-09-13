@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import apiClient from "../services/ApiClient";
+import apiClient, { setUnauthorizedHandler } from "../services/ApiClient";
 
 const useAuth = () => {
   const [user, setUser] = useState(null);
@@ -32,15 +32,10 @@ const useAuth = () => {
     }
 
     try {
-      const res = await apiClient.get("auth/users/me", {
-        headers: { Authorization: `JWT ${accessToken}` },
-      });
+      const res = await apiClient.get("auth/users/me");
       setUser(res.data);
     } catch (error) {
       console.error("User fetch failed:", error);
-      if (error.response?.status === 401) {
-        logout(); // Auto logout if token is invalid
-      }
     } finally {
       setLoading(false);
     }
@@ -72,6 +67,11 @@ const useAuth = () => {
     removeTokensFromLocalStorage();
     setUser(null);
   };
+
+  useEffect(() => {
+    setUnauthorizedHandler(logout);
+    return () => setUnauthorizedHandler(null);
+  }, []);
 
   // Check user on initial load
   useEffect(() => {
