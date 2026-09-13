@@ -4,6 +4,7 @@ import {
   FaBriefcase,
   FaSignOutAlt,
   FaUser,
+  FaStar,
 } from "react-icons/fa";
 import { useContext, useState } from "react";
 import { NavLink, useLocation } from "react-router";
@@ -14,6 +15,7 @@ const jobseekerNav = [
   { title: "Dashboard", path: "/dashboard", icon: <FaHome /> },
   { title: "Profile", path: "/dashboard/profile", icon: <FaUser /> },
   { title: "My Applications", path: "/dashboard/applications", icon: <FaUserTie /> },
+  { title: "Reviews", path: "/dashboard/reviews", icon: <FaStar /> },
 ];
 
 const employerNav = [
@@ -21,6 +23,7 @@ const employerNav = [
   { title: "Profile", path: "/dashboard/profile", icon: <FaUser /> },
   { title: "Posted Jobs", path: "/dashboard/posted-jobs", icon: <FaBriefcase /> },
   { title: "Applications", path: "/dashboard/applications", icon: <FaUserTie /> },
+  { title: "Reviews", path: "/dashboard/reviews", icon: <FaStar /> },
 ];
 
 const isNavActive = (path, pathname) => {

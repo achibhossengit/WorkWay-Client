@@ -1,71 +1,54 @@
-// Reviews Section Component
+import { useEffect, useState } from "react";
+import apiClient from "../../services/ApiClient";
+import ReviewCard from "../Reviews/ReviewCard";
+import Spinner from "../Utilities/Spinner";
 
-import { FaQuoteLeft, FaRegStar, FaStar } from "react-icons/fa";
-
-const reviews = [
-  {
-    name: "Sarah Johnson",
-    role: "Software Developer",
-    rating: 5,
-    content:
-      "Found my dream job within two weeks of using this platform. The matching system is incredibly accurate!",
-  },
-  {
-    name: "Michael Chen",
-    role: "HR Manager",
-    rating: 4,
-    content:
-      "As an employer, we've hired several excellent candidates through this service. Highly recommended.",
-  },
-  {
-    name: "Amina Rahman",
-    role: "Marketing Specialist",
-    rating: 5,
-    content:
-      "The career resources helped me negotiate a 20% higher salary than I expected. Very grateful!",
-  },
-];
+const listFrom = (data) =>
+  Array.isArray(data) ? data : data?.results || [];
 
 const ReviewsSection = () => {
-  const renderStars = (rating) => {
-    return [...Array(5)].map((_, i) =>
-      i < rating ? (
-        <FaStar key={i} className="text-yellow-400" />
-      ) : (
-        <FaRegStar key={i} className="text-yellow-400" />
-      )
-    );
-  };
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadReviews = async () => {
+      setLoading(true);
+      try {
+        const res = await apiClient.get("reviews/");
+        setReviews(listFrom(res.data));
+      } catch {
+        setReviews([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadReviews();
+  }, []);
 
   return (
-    <div className="py-16 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
+    <div className="bg-white py-16">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-12 text-center">
           <h2 className="text-3xl font-bold text-gray-800">
-            What Our Users Say
+            What Job Seekers Say
           </h2>
-          <p className="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">
-            Hear from job seekers and employers who found success with our
-            platform
+          <p className="mx-auto mt-4 max-w-3xl text-lg text-gray-600">
+            Real ratings and comments left for employers on WorkWay
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {reviews.map((review, index) => (
-            <div
-              key={index}
-              className="bg-gray-50 p-6 rounded-lg border border-gray-200"
-            >
-              <div className="mb-4 flex">{renderStars(review.rating)}</div>
-              <FaQuoteLeft className="text-gray-300 mb-4" />
-              <p className="text-gray-700 mb-6">{review.content}</p>
-              <div>
-                <h4 className="font-semibold text-gray-800">{review.name}</h4>
-                <p className="text-gray-600">{review.role}</p>
-              </div>
-            </div>
-          ))}
-        </div>
+        {loading ? (
+          <Spinner title="Loading reviews..." />
+        ) : reviews.length === 0 ? (
+          <p className="text-center text-gray-500">No reviews yet.</p>
+        ) : (
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+            {reviews.map((review) => (
+              <ReviewCard key={review.id} review={review} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

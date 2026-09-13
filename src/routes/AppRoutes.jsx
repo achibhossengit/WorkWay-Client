@@ -19,6 +19,7 @@ import PostedJobDetails from "../pages/DashBoard/PostedJobDetails";
 import JobApplications from "../pages/DashBoard/JobApplications";
 import ApplicationDetails from "../pages/DashBoard/ApplicationDetails";
 import PostJob from "../pages/DashBoard/PostJob";
+import Reviews from "../pages/DashBoard/Reviews";
 
 const AppRoutes = () => {
   return (
@@ -42,6 +43,7 @@ const AppRoutes = () => {
           <Route index element={<Dashboard />} />
           <Route path="profile" element={<Profile />} />
           <Route path="applications" element={<Applications />} />
+          <Route path="reviews" element={<Reviews />} />
           <Route
             path="posted-jobs"
             element={
