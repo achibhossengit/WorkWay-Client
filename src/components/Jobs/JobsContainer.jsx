@@ -17,7 +17,9 @@ const JobsContainer = ({ jobs }) => {
         return;
       }
       try {
-        const res = await apiClient.get(`jobseekers/${user.id}/applications/`);
+        const res = await apiClient.get(
+          `jobseekers/${user.id}/applications/?page_size=100`
+        );
         const ids = listFrom(res.data)
           .filter((application) => application.status !== "C")
           .map((application) => application.job);

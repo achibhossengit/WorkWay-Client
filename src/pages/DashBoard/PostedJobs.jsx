@@ -6,7 +6,9 @@ import apiClient from "../../services/ApiClient";
 import Spinner from "../../components/Utilities/Spinner";
 import Pagination from "../../components/Utilities/Pagination";
 import PostJobModal from "../../components/Jobs/PostJobModal";
-import useClientPagination from "../../hooks/useClientPagination";
+import useServerPagination, {
+  countFrom,
+} from "../../hooks/useServerPagination";
 import {
   formatDate,
   getJobType,
@@ -17,12 +19,13 @@ const PostedJobs = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [jobs, setJobs] = useState([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [isCreateOpen, setIsCreateOpen] = useState(
     searchParams.get("create") === "1"
   );
-  const { currentPage, totalPage, pageItems, handlePageChange } =
-    useClientPagination(jobs, 10);
+  const { currentPage, totalPage, applyPageData, handlePageChange, resetPage } =
+    useServerPagination();
 
   useEffect(() => {
     if (searchParams.get("create") === "1") {
@@ -37,8 +40,11 @@ const PostedJobs = () => {
       if (!user?.id) return;
       setLoading(true);
       try {
-        const res = await apiClient.get(`employers/${user.id}/jobs/`);
-        setJobs(Array.isArray(res.data) ? res.data : res.data.results || []);
+        const res = await apiClient.get(
+          `employers/${user.id}/jobs/?page=${currentPage}`
+        );
+        setJobs(applyPageData(res.data));
+        setTotalCount(countFrom(res.data));
       } catch {
         toast.error("Could not load your posted jobs.");
       } finally {
@@ -47,11 +53,21 @@ const PostedJobs = () => {
     };
 
     loadJobs();
-  }, [user?.id]);
+  }, [user?.id, currentPage, applyPageData]);
 
-  const handleCreated = (job) => {
-    setJobs((current) => [job, ...current]);
+  const handleCreated = () => {
     setIsCreateOpen(false);
+    if (currentPage === 1) {
+      apiClient
+        .get(`employers/${user.id}/jobs/?page=1`)
+        .then((res) => {
+          setJobs(applyPageData(res.data));
+          setTotalCount(countFrom(res.data));
+        })
+        .catch(() => {});
+    } else {
+      resetPage();
+    }
   };
 
   if (loading) return <Spinner title="Loading posted jobs..." />;
@@ -69,7 +85,7 @@ const PostedJobs = () => {
         </button>
       </div>
 
-      {jobs.length === 0 ? (
+      {totalCount === 0 ? (
         <p className="text-gray-500">
           You have not posted any jobs yet.{" "}
           <button
@@ -95,7 +111,7 @@ const PostedJobs = () => {
                 </tr>
               </thead>
               <tbody>
-                {pageItems.map((job) => (
+                {jobs.map((job) => (
                   <tr
                     key={job.id}
                     role="button"
@@ -133,6 +149,7 @@ const PostedJobs = () => {
             currentPage={currentPage}
             totalPage={totalPage}
             onPageChange={handlePageChange}
+            disabled={loading}
           />
         </>
       )}

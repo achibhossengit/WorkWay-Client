@@ -5,7 +5,9 @@ import { AuthContext } from "../../context/authContext";
 import apiClient from "../../services/ApiClient";
 import Spinner from "../../components/Utilities/Spinner";
 import Pagination from "../../components/Utilities/Pagination";
-import useClientPagination from "../../hooks/useClientPagination";
+import useServerPagination, {
+  countFrom,
+} from "../../hooks/useServerPagination";
 import { formatDate } from "../../components/Utilities/UtilityFunctions";
 import {
   STATUS_LABELS,
@@ -19,9 +21,10 @@ const JobApplications = () => {
   const navigate = useNavigate();
   const [job, setJob] = useState(null);
   const [applications, setApplications] = useState([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
-  const { currentPage, totalPage, pageItems, handlePageChange } =
-    useClientPagination(applications, 10);
+  const { currentPage, totalPage, applyPageData, handlePageChange } =
+    useServerPagination();
 
   useEffect(() => {
     const load = async () => {
@@ -30,7 +33,9 @@ const JobApplications = () => {
       try {
         const [jobRes, appRes] = await Promise.all([
           apiClient.get(`jobs/${jobId}/`),
-          apiClient.get(`employers/${user.id}/jobs/${jobId}/applications/`),
+          apiClient.get(
+            `employers/${user.id}/jobs/${jobId}/applications/?page=${currentPage}`
+          ),
         ]);
         if (
           user.username &&
@@ -42,9 +47,8 @@ const JobApplications = () => {
           return;
         }
         setJob(jobRes.data);
-        setApplications(
-          Array.isArray(appRes.data) ? appRes.data : appRes.data.results || []
-        );
+        setApplications(applyPageData(appRes.data));
+        setTotalCount(countFrom(appRes.data));
       } catch {
         toast.error("Could not load applications.");
         navigate("/dashboard/posted-jobs");
@@ -54,7 +58,7 @@ const JobApplications = () => {
     };
 
     load();
-  }, [jobId, user?.id, user?.username, navigate]);
+  }, [jobId, user?.id, user?.username, navigate, currentPage, applyPageData]);
 
   if (loading) return <Spinner title="Loading applications..." />;
 
@@ -68,11 +72,11 @@ const JobApplications = () => {
       </Link>
       <h1 className="mb-1 text-2xl font-bold text-gray-800">Applications</h1>
       <p className="mb-6 text-sm text-gray-500">
-        {job?.title || "Job"} • {applications.length} applicant
-        {applications.length === 1 ? "" : "s"}
+        {job?.title || "Job"} • {totalCount} applicant
+        {totalCount === 1 ? "" : "s"}
       </p>
 
-      {applications.length === 0 ? (
+      {totalCount === 0 ? (
         <p className="text-gray-500">No applications yet for this job.</p>
       ) : (
         <>
@@ -86,7 +90,7 @@ const JobApplications = () => {
                 </tr>
               </thead>
               <tbody>
-                {pageItems.map((application) => (
+                {applications.map((application) => (
                   <tr
                     key={application.id}
                     role="button"
@@ -131,6 +135,7 @@ const JobApplications = () => {
             currentPage={currentPage}
             totalPage={totalPage}
             onPageChange={handlePageChange}
+            disabled={loading}
           />
         </>
       )}

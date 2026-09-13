@@ -4,9 +4,7 @@ import { toast } from "react-toastify";
 import { AuthContext } from "../../context/authContext";
 import apiClient from "../../services/ApiClient";
 import Spinner from "../../components/Utilities/Spinner";
-
-const listFrom = (data) =>
-  Array.isArray(data) ? data : data?.results || [];
+import { countFrom } from "../../hooks/useServerPagination";
 
 const StatCard = ({ label, value, to }) => (
   <Link
@@ -31,12 +29,16 @@ const JobseekerDashboard = ({ user }) => {
       if (!user?.id) return;
       setLoading(true);
       try {
-        const res = await apiClient.get(`jobseekers/${user.id}/applications/`);
-        const applications = listFrom(res.data);
+        const base = `jobseekers/${user.id}/applications`;
+        const [totalRes, pendingRes, acceptedRes] = await Promise.all([
+          apiClient.get(`${base}/?page_size=1`),
+          apiClient.get(`${base}/?status=P&page_size=1`),
+          apiClient.get(`${base}/?status=A&page_size=1`),
+        ]);
         setStats({
-          total: applications.length,
-          pending: applications.filter((app) => app.status === "P").length,
-          accepted: applications.filter((app) => app.status === "A").length,
+          total: countFrom(totalRes.data),
+          pending: countFrom(pendingRes.data),
+          accepted: countFrom(acceptedRes.data),
         });
       } catch {
         toast.error("Could not load dashboard summary.");
@@ -91,23 +93,15 @@ const EmployerDashboard = ({ user }) => {
       if (!user?.id) return;
       setLoading(true);
       try {
-        const jobsRes = await apiClient.get(`employers/${user.id}/jobs/`);
-        const jobs = listFrom(jobsRes.data);
-
-        const groups = await Promise.all(
-          jobs.map(async (job) => {
-            const res = await apiClient.get(
-              `employers/${user.id}/jobs/${job.id}/applications/`
-            );
-            return listFrom(res.data);
-          })
-        );
-        const applications = groups.flat();
-
+        const [jobsRes, appsRes] = await Promise.all([
+          apiClient.get(`employers/${user.id}/jobs/?page_size=1`),
+          apiClient.get(
+            `employers/${user.id}/applications/?status=P&page_size=1`
+          ),
+        ]);
         setStats({
-          jobs: jobs.length,
-          newApplications: applications.filter((app) => app.status === "P")
-            .length,
+          jobs: countFrom(jobsRes.data),
+          newApplications: countFrom(appsRes.data),
         });
       } catch {
         toast.error("Could not load dashboard summary.");

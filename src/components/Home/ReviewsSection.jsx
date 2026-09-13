@@ -14,7 +14,7 @@ const ReviewsSection = () => {
     const loadReviews = async () => {
       setLoading(true);
       try {
-        const res = await apiClient.get("reviews/");
+        const res = await apiClient.get("reviews/?page_size=6");
         setReviews(listFrom(res.data));
       } catch {
         setReviews([]);

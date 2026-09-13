@@ -6,10 +6,10 @@ import ReviewCard from "../../components/Reviews/ReviewCard";
 import StarRating from "../../components/Reviews/StarRating";
 import Spinner from "../../components/Utilities/Spinner";
 import Pagination from "../../components/Utilities/Pagination";
-import useClientPagination from "../../hooks/useClientPagination";
-
-const listFrom = (data) =>
-  Array.isArray(data) ? data : data?.results || [];
+import useServerPagination, {
+  countFrom,
+  listFrom,
+} from "../../hooks/useServerPagination";
 
 const FINISHED_STATUSES = new Set(["A", "X"]);
 
@@ -31,17 +31,21 @@ const employersFromFinishedApplications = (applications) => {
 const EmployerReviews = () => {
   const { user } = useContext(AuthContext);
   const [reviews, setReviews] = useState([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
-  const { currentPage, totalPage, pageItems, handlePageChange } =
-    useClientPagination(reviews, 10);
+  const { currentPage, totalPage, applyPageData, handlePageChange } =
+    useServerPagination();
 
   useEffect(() => {
     const load = async () => {
       if (!user?.id) return;
       setLoading(true);
       try {
-        const res = await apiClient.get(`employers/${user.id}/reviews/`);
-        setReviews(listFrom(res.data));
+        const res = await apiClient.get(
+          `employers/${user.id}/reviews/?page=${currentPage}`
+        );
+        setReviews(applyPageData(res.data));
+        setTotalCount(countFrom(res.data));
       } catch {
         toast.error("Could not load reviews.");
       } finally {
@@ -50,7 +54,7 @@ const EmployerReviews = () => {
     };
 
     load();
-  }, [user?.id]);
+  }, [user?.id, currentPage, applyPageData]);
 
   if (loading) return <Spinner title="Loading reviews..." />;
 
@@ -62,12 +66,12 @@ const EmployerReviews = () => {
         can only read these reviews.
       </p>
 
-      {reviews.length === 0 ? (
+      {totalCount === 0 ? (
         <p className="text-gray-500">No reviews yet.</p>
       ) : (
         <>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            {pageItems.map((review) => (
+            {reviews.map((review) => (
               <ReviewCard key={review.id} review={review} />
             ))}
           </div>
@@ -75,6 +79,7 @@ const EmployerReviews = () => {
             currentPage={currentPage}
             totalPage={totalPage}
             onPageChange={handlePageChange}
+            disabled={loading}
           />
         </>
       )}
@@ -85,6 +90,8 @@ const EmployerReviews = () => {
 const JobseekerReviews = () => {
   const { user } = useContext(AuthContext);
   const [reviews, setReviews] = useState([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [reviewedIds, setReviewedIds] = useState(new Set());
   const [employers, setEmployers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -92,33 +99,50 @@ const JobseekerReviews = () => {
   const [employerId, setEmployerId] = useState("");
   const [ratings, setRatings] = useState(0);
   const [comment, setComment] = useState("");
-  const { currentPage, totalPage, pageItems, handlePageChange } =
-    useClientPagination(reviews, 10);
-
-  const reviewedIds = useMemo(
-    () => new Set(reviews.map((review) => review.employer)),
-    [reviews]
-  );
+  const { currentPage, totalPage, applyPageData, handlePageChange, resetPage } =
+    useServerPagination();
 
   const availableEmployers = employers.filter(
     (employer) => !reviewedIds.has(employer.id)
   );
 
-  const editingReview = reviews.find((review) => review.id === editingId);
+  const editingReview = useMemo(
+    () => reviews.find((review) => review.id === editingId),
+    [reviews, editingId]
+  );
+
+  useEffect(() => {
+    const loadMeta = async () => {
+      if (!user?.id) return;
+      try {
+        const [allReviewsRes, appsRes] = await Promise.all([
+          apiClient.get(`jobseekers/${user.id}/reviews/?page_size=100`),
+          apiClient.get(`jobseekers/${user.id}/applications/?page_size=100`),
+        ]);
+        setReviewedIds(
+          new Set(listFrom(allReviewsRes.data).map((review) => review.employer))
+        );
+        setEmployers(
+          employersFromFinishedApplications(listFrom(appsRes.data))
+        );
+      } catch {
+        /* list load below will toast if needed */
+      }
+    };
+
+    loadMeta();
+  }, [user?.id]);
 
   useEffect(() => {
     const load = async () => {
       if (!user?.id) return;
       setLoading(true);
       try {
-        const [reviewsRes, appsRes] = await Promise.all([
-          apiClient.get(`jobseekers/${user.id}/reviews/`),
-          apiClient.get(`jobseekers/${user.id}/applications/`),
-        ]);
-        setReviews(listFrom(reviewsRes.data));
-        setEmployers(
-          employersFromFinishedApplications(listFrom(appsRes.data))
+        const res = await apiClient.get(
+          `jobseekers/${user.id}/reviews/?page=${currentPage}`
         );
+        setReviews(applyPageData(res.data));
+        setTotalCount(countFrom(res.data));
       } catch {
         toast.error("Could not load reviews.");
       } finally {
@@ -127,7 +151,7 @@ const JobseekerReviews = () => {
     };
 
     load();
-  }, [user?.id]);
+  }, [user?.id, currentPage, applyPageData]);
 
   const resetForm = () => {
     setEditingId(null);
@@ -144,13 +168,30 @@ const JobseekerReviews = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const reloadPage = async (page = currentPage) => {
+    const res = await apiClient.get(
+      `jobseekers/${user.id}/reviews/?page=${page}`
+    );
+    setReviews(applyPageData(res.data));
+    setTotalCount(countFrom(res.data));
+  };
+
   const handleDelete = async (review) => {
     if (!window.confirm("Delete this review?")) return;
     setSubmitting(true);
     try {
       await apiClient.delete(`jobseekers/${user.id}/reviews/${review.id}/`);
-      setReviews((current) => current.filter((item) => item.id !== review.id));
+      setReviewedIds((current) => {
+        const next = new Set(current);
+        next.delete(review.employer);
+        return next;
+      });
       if (editingId === review.id) resetForm();
+      if (reviews.length === 1 && currentPage > 1) {
+        handlePageChange(currentPage - 1);
+      } else {
+        await reloadPage();
+      }
       toast.success("Review deleted.");
     } catch {
       toast.error("Could not delete this review.");
@@ -173,19 +214,12 @@ const JobseekerReviews = () => {
     setSubmitting(true);
     try {
       if (editingId) {
-        const res = await apiClient.patch(
-          `jobseekers/${user.id}/reviews/${editingId}/`,
-          {
-            ratings,
-            comment: comment.trim(),
-          }
-        );
-        setReviews((current) =>
-          current.map((review) =>
-            review.id === editingId ? { ...review, ...res.data } : review
-          )
-        );
+        await apiClient.patch(`jobseekers/${user.id}/reviews/${editingId}/`, {
+          ratings,
+          comment: comment.trim(),
+        });
         resetForm();
+        await reloadPage();
         toast.success("Review updated.");
       } else {
         const res = await apiClient.post(`jobseekers/${user.id}/reviews/`, {
@@ -193,8 +227,13 @@ const JobseekerReviews = () => {
           ratings,
           comment: comment.trim(),
         });
-        setReviews((current) => [res.data, ...current]);
+        setReviewedIds((current) => new Set(current).add(res.data.employer));
         resetForm();
+        if (currentPage !== 1) {
+          resetPage();
+        } else {
+          await reloadPage(1);
+        }
         toast.success("Review submitted.");
       }
     } catch (error) {
@@ -314,12 +353,12 @@ const JobseekerReviews = () => {
         <h2 className="mb-4 text-lg font-semibold text-gray-800">
           Your reviews
         </h2>
-        {reviews.length === 0 ? (
+        {totalCount === 0 ? (
           <p className="text-gray-500">You have not reviewed any employer yet.</p>
         ) : (
           <>
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              {pageItems.map((review) => (
+              {reviews.map((review) => (
                 <ReviewCard
                   key={review.id}
                   review={review}
@@ -333,6 +372,7 @@ const JobseekerReviews = () => {
               currentPage={currentPage}
               totalPage={totalPage}
               onPageChange={handlePageChange}
+              disabled={loading}
             />
           </>
         )}

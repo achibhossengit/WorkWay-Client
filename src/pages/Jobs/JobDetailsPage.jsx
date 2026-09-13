@@ -31,7 +31,7 @@ const JobDetailsPage = () => {
 
         if (user?.user_type === "Jobseeker" && user?.id) {
           const appsRes = await apiClient.get(
-            `jobseekers/${user.id}/applications/`
+            `jobseekers/${user.id}/applications/?job=${jobId}`
           );
           const match = listFrom(appsRes.data).find(
             (app) => String(app.job) === String(jobId)

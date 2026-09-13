@@ -5,7 +5,9 @@ import { AuthContext } from "../../context/authContext";
 import apiClient from "../../services/ApiClient";
 import Spinner from "../../components/Utilities/Spinner";
 import Pagination from "../../components/Utilities/Pagination";
-import useClientPagination from "../../hooks/useClientPagination";
+import useServerPagination, {
+  countFrom,
+} from "../../hooks/useServerPagination";
 import { formatDate } from "../../components/Utilities/UtilityFunctions";
 import {
   STATUS_LABELS,
@@ -17,36 +19,21 @@ const EmployerApplications = () => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
   const [applications, setApplications] = useState([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
-  const { currentPage, totalPage, pageItems, handlePageChange } =
-    useClientPagination(applications, 10);
+  const { currentPage, totalPage, applyPageData, handlePageChange } =
+    useServerPagination();
 
   useEffect(() => {
     const load = async () => {
       if (!user?.id) return;
       setLoading(true);
       try {
-        const jobsRes = await apiClient.get(`employers/${user.id}/jobs/`);
-        const jobs = Array.isArray(jobsRes.data)
-          ? jobsRes.data
-          : jobsRes.data.results || [];
-
-        const groups = await Promise.all(
-          jobs.map(async (job) => {
-            const res = await apiClient.get(
-              `employers/${user.id}/jobs/${job.id}/applications/`
-            );
-            const items = Array.isArray(res.data)
-              ? res.data
-              : res.data.results || [];
-            return items.map((application) => ({
-              ...application,
-              job_title: application.job_title || job.title,
-              job: application.job || job.id,
-            }));
-          })
+        const res = await apiClient.get(
+          `employers/${user.id}/applications/?page=${currentPage}`
         );
-        setApplications(groups.flat());
+        setApplications(applyPageData(res.data));
+        setTotalCount(countFrom(res.data));
       } catch {
         toast.error("Could not load applications.");
       } finally {
@@ -55,7 +42,7 @@ const EmployerApplications = () => {
     };
 
     load();
-  }, [user?.id]);
+  }, [user?.id, currentPage, applyPageData]);
 
   if (loading) return <Spinner title="Loading applications..." />;
 
@@ -63,7 +50,7 @@ const EmployerApplications = () => {
     <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-md">
       <h1 className="mb-6 text-2xl font-bold text-gray-800">Applications</h1>
 
-      {applications.length === 0 ? (
+      {totalCount === 0 ? (
         <p className="text-gray-500">
           No applications yet. Applicants will appear here after they apply to
           your jobs.
@@ -81,7 +68,7 @@ const EmployerApplications = () => {
                 </tr>
               </thead>
               <tbody>
-                {pageItems.map((application) => (
+                {applications.map((application) => (
                   <tr
                     key={application.id}
                     role="button"
@@ -129,6 +116,7 @@ const EmployerApplications = () => {
             currentPage={currentPage}
             totalPage={totalPage}
             onPageChange={handlePageChange}
+            disabled={loading}
           />
         </>
       )}

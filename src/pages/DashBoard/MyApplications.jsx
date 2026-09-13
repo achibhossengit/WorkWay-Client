@@ -5,7 +5,9 @@ import { AuthContext } from "../../context/authContext";
 import apiClient from "../../services/ApiClient";
 import Spinner from "../../components/Utilities/Spinner";
 import Pagination from "../../components/Utilities/Pagination";
-import useClientPagination from "../../hooks/useClientPagination";
+import useServerPagination, {
+  countFrom,
+} from "../../hooks/useServerPagination";
 import { formatDate } from "../../components/Utilities/UtilityFunctions";
 
 const STATUS_LABELS = {
@@ -28,19 +30,21 @@ const MyApplications = () => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
   const [applications, setApplications] = useState([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
-  const { currentPage, totalPage, pageItems, handlePageChange } =
-    useClientPagination(applications, 10);
+  const { currentPage, totalPage, applyPageData, handlePageChange } =
+    useServerPagination();
 
   useEffect(() => {
     const loadApplications = async () => {
       if (!user?.id) return;
       setLoading(true);
       try {
-        const res = await apiClient.get(`jobseekers/${user.id}/applications/`);
-        setApplications(
-          Array.isArray(res.data) ? res.data : res.data.results || []
+        const res = await apiClient.get(
+          `jobseekers/${user.id}/applications/?page=${currentPage}`
         );
+        setApplications(applyPageData(res.data));
+        setTotalCount(countFrom(res.data));
       } catch {
         toast.error("Could not load your applications.");
       } finally {
@@ -49,7 +53,7 @@ const MyApplications = () => {
     };
 
     loadApplications();
-  }, [user?.id]);
+  }, [user?.id, currentPage, applyPageData]);
 
   if (loading) return <Spinner title="Loading applications..." />;
 
@@ -57,7 +61,7 @@ const MyApplications = () => {
     <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-md">
       <h1 className="mb-6 text-2xl font-bold text-gray-800">My Applications</h1>
 
-      {applications.length === 0 ? (
+      {totalCount === 0 ? (
         <p className="text-gray-500">You have not applied to any jobs yet.</p>
       ) : (
         <>
@@ -71,7 +75,7 @@ const MyApplications = () => {
                 </tr>
               </thead>
               <tbody>
-                {pageItems.map((application) => (
+                {applications.map((application) => (
                   <tr
                     key={application.id}
                     role="button"
@@ -110,6 +114,7 @@ const MyApplications = () => {
             currentPage={currentPage}
             totalPage={totalPage}
             onPageChange={handlePageChange}
+            disabled={loading}
           />
         </>
       )}
