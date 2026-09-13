@@ -11,6 +11,7 @@ import Profile from "../pages/DashBoard/Profile";
 import PrivateRoutes from "./PrivateRoutes";
 import Activation from "../pages/SignUp/Activation";
 import PasswordReset from "../pages/SignIn/PasswordReset";
+import AboutUs from "../pages/About/AboutUs";
 
 const AppRoutes = () => {
   return (
@@ -18,6 +19,7 @@ const AppRoutes = () => {
       <Route path="/" element={<MainLayout />}>
         <Route index element={<HomePage />} />
         <Route path="jobs" element={<JobsPage />} />
+        <Route path="about-us" element={<AboutUs />} />
         <Route path="login" element={<Login />} />
         <Route path="register" element={<SignUp />} />
         <Route path="activate/:uid/:token" element={<Activation />} />

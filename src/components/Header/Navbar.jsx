@@ -52,9 +52,9 @@ const Navbar = () => {
           >
             {links.map((link, index) => (
               <li key={index}>
-                <a href={link.path} className="flex items-center gap-2">
+                <NavLink to={link.path} className="flex items-center gap-2">
                   {link.icon} {link.title}
-                </a>
+                </NavLink>
               </li>
             ))}
           </ul>
@@ -65,9 +65,9 @@ const Navbar = () => {
         <ul className="menu menu-horizontal px-1">
           {links.map((link, index) => (
             <li key={index}>
-              <a href={link.path} className="flex items-center gap-2">
+              <NavLink to={link.path} className="flex items-center gap-2">
                 {link.icon} {link.title}
-              </a>
+              </NavLink>
             </li>
           ))}
         </ul>
