@@ -4,6 +4,8 @@ export const getJobType = (code) => {
       return "Full-time";
     case "H":
       return "Part-time";
+    case "I":
+      return "Intern";
     default:
       return "Not specified";
   }
@@ -19,12 +21,13 @@ export const formatDate = (dateString) => {
 
 export const getWorkplace = (code) => {
   switch (code) {
+    case "H":
     case "R":
-      return "Remote";
+      return "Home";
     case "Hy":
       return "Hybrid";
     case "O":
-      return "On-site";
+      return "Office";
     default:
       return "Not specified";
   }

@@ -2,7 +2,6 @@ import {
   FaHome,
   FaUserTie,
   FaBriefcase,
-  FaPlusCircle,
   FaSignOutAlt,
   FaUser,
 } from "react-icons/fa";
@@ -21,7 +20,6 @@ const employerNav = [
   { title: "Dashboard", path: "/dashboard", icon: <FaHome /> },
   { title: "Profile", path: "/dashboard/profile", icon: <FaUser /> },
   { title: "Posted Jobs", path: "/dashboard/posted-jobs", icon: <FaBriefcase /> },
-  { title: "Post Job", path: "/dashboard/post-job", icon: <FaPlusCircle /> },
   { title: "Applications", path: "/dashboard/applications", icon: <FaUserTie /> },
 ];
 
