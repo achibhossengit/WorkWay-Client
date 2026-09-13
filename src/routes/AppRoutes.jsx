@@ -16,6 +16,8 @@ import RoleRoute from "./RoleRoute";
 import Applications from "../pages/DashBoard/Applications";
 import PostedJobs from "../pages/DashBoard/PostedJobs";
 import PostedJobDetails from "../pages/DashBoard/PostedJobDetails";
+import JobApplications from "../pages/DashBoard/JobApplications";
+import ApplicationDetails from "../pages/DashBoard/ApplicationDetails";
 import PostJob from "../pages/DashBoard/PostJob";
 
 const AppRoutes = () => {
@@ -45,6 +47,22 @@ const AppRoutes = () => {
             element={
               <RoleRoute roles={["Employer"]}>
                 <PostedJobs />
+              </RoleRoute>
+            }
+          />
+          <Route
+            path="posted-jobs/:jobId/applications/:applicationId"
+            element={
+              <RoleRoute roles={["Employer"]}>
+                <ApplicationDetails />
+              </RoleRoute>
+            }
+          />
+          <Route
+            path="posted-jobs/:jobId/applications"
+            element={
+              <RoleRoute roles={["Employer"]}>
+                <JobApplications />
               </RoleRoute>
             }
           />

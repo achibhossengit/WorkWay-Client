@@ -74,6 +74,13 @@ const PostedJobDetails = () => {
       <div className="mt-8 flex flex-wrap justify-end gap-3 border-t border-gray-200 pt-4">
         <button
           type="button"
+          onClick={() => navigate(`/dashboard/posted-jobs/${job.id}/applications`)}
+          className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-blue-700"
+        >
+          View Applications
+        </button>
+        <button
+          type="button"
           onClick={() => navigate(`/dashboard/post-job/${job.id}`)}
           className="rounded-lg border border-gray-300 px-6 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
         >
