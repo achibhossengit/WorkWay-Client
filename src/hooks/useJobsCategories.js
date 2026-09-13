@@ -1,5 +1,7 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import apiClient from "../services/ApiClient";
+
+const SEARCH_DEBOUNCE_MS = 400;
 
 const useJobsCategories = () => {
   const [jobs, setJobs] = useState([]);
@@ -8,52 +10,60 @@ const useJobsCategories = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [searchCategory, setSearchCategory] = useState("");
+  const [keywordInput, setKeywordInput] = useState("");
   const [searchKeyword, setSearchKeyword] = useState("");
 
-  const fetchJobs = async () => {
-    setLoading(true);
-    try {
-      const res = await apiClient.get(`jobs/?page=${currentPage}&category=${searchCategory}&search=${searchKeyword}`);
-      if (res) {
-        setJobs(res.data.results);
-        setTotalPage(Math.ceil(res.data.count / 10));
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearchKeyword(keywordInput.trim());
+      setCurrentPage(1);
+    }, SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(timer);
+  }, [keywordInput]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await apiClient.get("categories");
+        setCategories(Array.isArray(res.data) ? res.data : res.data.results || []);
+      } catch (error) {
+        console.log(error);
       }
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-  const fetchCategories = async () => {
-    setLoading(true);
-    try {
-      const res = await apiClient.get("categories");
-      if (res) {
-        setCategories(res.data);
+    };
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
+    const fetchJobs = async () => {
+      setLoading(true);
+      try {
+        const params = new URLSearchParams({ page: String(currentPage) });
+        if (searchCategory) params.set("category", searchCategory);
+        if (searchKeyword) params.set("search", searchKeyword);
+        const res = await apiClient.get(`jobs/?${params.toString()}`);
+        setJobs(res.data.results || []);
+        setTotalPage(Math.ceil((res.data.count || 0) / 10));
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+    fetchJobs();
+  }, [currentPage, searchCategory, searchKeyword]);
 
   const handleCurrentPage = (page) => {
     setCurrentPage(page);
   };
 
-  const handleSearch =(e)=>{
-    e.preventDefault();
-    const category = e.target.category.value;
-    const keyword = e.target.keyword.value;
-    setSearchCategory(category)
-    setSearchKeyword(keyword)
-  }
+  const handleCategoryChange = (category) => {
+    setSearchCategory(category);
+    setCurrentPage(1);
+  };
 
-  useEffect(() => {
-    fetchJobs();
-    fetchCategories();
-  }, [currentPage, searchCategory, searchKeyword]);
+  const handleKeywordChange = (keyword) => {
+    setKeywordInput(keyword);
+  };
 
   return {
     jobs,
@@ -61,10 +71,11 @@ const useJobsCategories = () => {
     loading,
     totalPage,
     currentPage,
-    fetchJobs,
-    fetchCategories,
+    searchCategory,
+    keywordInput,
     handleCurrentPage,
-    handleSearch
+    handleCategoryChange,
+    handleKeywordChange,
   };
 };
 

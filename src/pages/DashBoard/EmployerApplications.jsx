@@ -4,6 +4,8 @@ import { toast } from "react-toastify";
 import { AuthContext } from "../../context/authContext";
 import apiClient from "../../services/ApiClient";
 import Spinner from "../../components/Utilities/Spinner";
+import Pagination from "../../components/Utilities/Pagination";
+import useClientPagination from "../../hooks/useClientPagination";
 import { formatDate } from "../../components/Utilities/UtilityFunctions";
 import {
   STATUS_LABELS,
@@ -16,6 +18,8 @@ const EmployerApplications = () => {
   const navigate = useNavigate();
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { currentPage, totalPage, pageItems, handlePageChange } =
+    useClientPagination(applications, 10);
 
   useEffect(() => {
     const load = async () => {
@@ -65,61 +69,68 @@ const EmployerApplications = () => {
           your jobs.
         </p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[560px] text-left text-sm">
-            <thead>
-              <tr className="border-b border-gray-200 text-slate-500">
-                <th className="pb-3 font-medium">Job</th>
-                <th className="pb-3 font-medium">Applicant</th>
-                <th className="pb-3 font-medium">Applied on</th>
-                <th className="pb-3 font-medium">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {applications.map((application) => (
-                <tr
-                  key={application.id}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() =>
-                    navigate(
-                      `/dashboard/posted-jobs/${application.job}/applications/${application.id}`
-                    )
-                  }
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter" || event.key === " ") {
-                      event.preventDefault();
+        <>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[560px] text-left text-sm">
+              <thead>
+                <tr className="border-b border-gray-200 text-slate-500">
+                  <th className="pb-3 font-medium">Job</th>
+                  <th className="pb-3 font-medium">Applicant</th>
+                  <th className="pb-3 font-medium">Applied on</th>
+                  <th className="pb-3 font-medium">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pageItems.map((application) => (
+                  <tr
+                    key={application.id}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() =>
                       navigate(
                         `/dashboard/posted-jobs/${application.job}/applications/${application.id}`
-                      );
+                      )
                     }
-                  }}
-                  className="cursor-pointer border-b border-gray-100 last:border-0 transition-colors hover:bg-slate-50"
-                >
-                  <td className="py-4 font-medium text-gray-800">
-                    {application.job_title || `Job #${application.job}`}
-                  </td>
-                  <td className="py-4 text-gray-800">
-                    {applicantName(application.applicant)}
-                  </td>
-                  <td className="py-4 text-slate-600">
-                    {formatDate(application.applied_at)}
-                  </td>
-                  <td className="py-4">
-                    <span
-                      className={`rounded-full px-3 py-1 text-xs font-medium ${
-                        STATUS_STYLES[application.status] ||
-                        "bg-slate-100 text-slate-700"
-                      }`}
-                    >
-                      {STATUS_LABELS[application.status] || application.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        navigate(
+                          `/dashboard/posted-jobs/${application.job}/applications/${application.id}`
+                        );
+                      }
+                    }}
+                    className="cursor-pointer border-b border-gray-100 last:border-0 transition-colors hover:bg-slate-50"
+                  >
+                    <td className="py-4 font-medium text-gray-800">
+                      {application.job_title || `Job #${application.job}`}
+                    </td>
+                    <td className="py-4 text-gray-800">
+                      {applicantName(application.applicant)}
+                    </td>
+                    <td className="py-4 text-slate-600">
+                      {formatDate(application.applied_at)}
+                    </td>
+                    <td className="py-4">
+                      <span
+                        className={`rounded-full px-3 py-1 text-xs font-medium ${
+                          STATUS_STYLES[application.status] ||
+                          "bg-slate-100 text-slate-700"
+                        }`}
+                      >
+                        {STATUS_LABELS[application.status] || application.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <Pagination
+            currentPage={currentPage}
+            totalPage={totalPage}
+            onPageChange={handlePageChange}
+          />
+        </>
       )}
     </div>
   );

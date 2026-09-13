@@ -1,21 +1,22 @@
+import { createPortal } from "react-dom";
 import { FaSignOutAlt, FaTimes } from "react-icons/fa";
 
 const LogoutConfirmPopUp = ({ isOpen, onCancel, onConfirm }) => {
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center overflow-y-auto p-4 backdrop-blur-sm backdrop-brightness-50 sm:items-center"
+      className="fixed inset-0 z-[200] flex items-end justify-center overflow-y-auto p-4 backdrop-blur-sm backdrop-brightness-50 sm:items-center"
       onClick={onCancel}
     >
       <div
         className="relative my-auto max-h-[90dvh] w-full max-w-md overflow-y-auto rounded-lg bg-white p-6 shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
+        onClick={(event) => event.stopPropagation()}
       >
         <button
           type="button"
           onClick={onCancel}
-          className="absolute cursor-pointer top-2 right-2 text-gray-400 hover:text-gray-600 transition"
+          className="absolute right-2 top-2 cursor-pointer text-gray-400 transition hover:text-gray-600"
         >
           <FaTimes size={20} />
         </button>
@@ -24,31 +25,30 @@ const LogoutConfirmPopUp = ({ isOpen, onCancel, onConfirm }) => {
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-red-500">
             <FaSignOutAlt size={22} />
           </div>
-          <h1 className="text-2xl font-bold text-gray-800 mb-3">
-            Log out?
-          </h1>
-          <p className="text-gray-600 mb-6">
+          <h1 className="mb-3 text-2xl font-bold text-gray-800">Log out?</h1>
+          <p className="mb-6 text-gray-600">
             Are you sure you want to log out of your account?
           </p>
           <div className="flex justify-center gap-4">
             <button
               type="button"
               onClick={onCancel}
-              className="bg-gray-200 cursor-pointer text-gray-700 px-4 py-2 rounded-lg shadow-md hover:bg-gray-300 transition duration-200"
+              className="ui-btn-lift rounded-lg bg-gray-200 px-4 py-2 text-gray-700 shadow-md hover:bg-gray-300"
             >
               Cancel
             </button>
             <button
               type="button"
               onClick={onConfirm}
-              className="bg-red-600 cursor-pointer text-white px-4 py-2 rounded-lg shadow-md hover:bg-red-700 transition duration-200"
+              className="ui-btn-lift rounded-lg bg-red-600 px-4 py-2 text-white shadow-md hover:bg-red-700"
             >
               Logout
             </button>
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

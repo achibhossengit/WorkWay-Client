@@ -31,13 +31,17 @@ const JobsContainer = ({ jobs }) => {
   }, [user?.id, user?.user_type]);
 
   return (
-    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <div className="flex flex-wrap justify-center gap-6">
       {jobs.map((job) => (
-        <JobCard
+        <div
           key={job.id}
-          job={job}
-          hasApplied={appliedJobIds.has(job.id)}
-        />
+          className="w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)] xl:w-[calc(25%-1.125rem)]"
+        >
+          <JobCard
+            job={job}
+            hasApplied={appliedJobIds.has(job.id)}
+          />
+        </div>
       ))}
     </div>
   );

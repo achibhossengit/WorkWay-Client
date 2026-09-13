@@ -119,9 +119,9 @@ const SignIn = () => {
             <button
               type="submit"
               disabled={loading || !username || !password}
-              className={`w-full flex justify-center cursor-pointer items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-lg font-medium transition-colors duration-200 ${
+              className={`ui-btn-lift flex w-full items-center justify-center rounded-lg border border-transparent px-4 py-3 text-lg font-medium shadow-sm ${
                 loading || !username || !password
-                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  ? "cursor-not-allowed bg-gray-300 text-gray-500"
                   : "bg-blue-600 text-white hover:bg-blue-700"
               }`}
             >

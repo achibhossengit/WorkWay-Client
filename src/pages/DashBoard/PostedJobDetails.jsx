@@ -75,7 +75,7 @@ const PostedJobDetails = () => {
         <button
           type="button"
           onClick={() => navigate(`/dashboard/posted-jobs/${job.id}/applications`)}
-          className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-blue-700"
+          className="ui-btn-lift rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-blue-700"
         >
           View Applications
         </button>
@@ -90,7 +90,7 @@ const PostedJobDetails = () => {
           type="button"
           onClick={handleDelete}
           disabled={deleting}
-          className="rounded-lg bg-red-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-60"
+          className="ui-btn-lift rounded-lg bg-red-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-60"
         >
           {deleting ? "Deleting..." : "Delete"}
         </button>

@@ -1,7 +1,6 @@
 import TotalCards from "./TotalCards";
-import Filter from "../Filter/Filter";
 
-const FilterSection = ({ categories, handleSearch }) => {
+const FilterSection = () => {
   return (
     <div
       className="w-full bg-cover bg-center"
@@ -21,10 +20,6 @@ const FilterSection = ({ categories, handleSearch }) => {
         </div>
 
         <TotalCards />
-
-        <div className="mx-auto max-w-6xl">
-          <Filter categories={categories} handleSearch={handleSearch} />
-        </div>
       </div>
     </div>
   );

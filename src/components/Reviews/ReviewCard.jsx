@@ -6,7 +6,7 @@ const ReviewCard = ({ review, onEdit, onDelete, busy }) => {
   const company = review.employer_company || "an employer";
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-gray-50 p-6">
+    <div className="ui-card-lift rounded-lg border border-gray-200 bg-gray-50 p-6 shadow-sm">
       <div className="mb-4">
         <StarRating value={review.ratings || 0} />
       </div>
@@ -26,7 +26,7 @@ const ReviewCard = ({ review, onEdit, onDelete, busy }) => {
                 type="button"
                 onClick={() => onEdit(review)}
                 disabled={busy}
-                className="rounded-lg px-3 py-1.5 text-sm font-medium text-blue-600 hover:bg-blue-50 disabled:opacity-60"
+                className="ui-btn-lift rounded-lg px-3 py-1.5 text-sm font-medium text-blue-600 hover:bg-blue-50 disabled:opacity-60"
               >
                 Edit
               </button>
@@ -36,7 +36,7 @@ const ReviewCard = ({ review, onEdit, onDelete, busy }) => {
                 type="button"
                 onClick={() => onDelete(review)}
                 disabled={busy}
-                className="rounded-lg px-3 py-1.5 text-sm font-medium text-rose-600 hover:bg-rose-50 disabled:opacity-60"
+                className="ui-btn-lift rounded-lg px-3 py-1.5 text-sm font-medium text-rose-600 hover:bg-rose-50 disabled:opacity-60"
               >
                 Delete
               </button>

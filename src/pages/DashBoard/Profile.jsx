@@ -184,14 +184,14 @@ const Profile = () => {
           type="button"
           onClick={cancelEdit}
           disabled={saving}
-          className="rounded-lg px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100 disabled:opacity-60"
+          className="ui-btn-lift rounded-lg px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100 disabled:opacity-60"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={saving}
-          className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
+          className="ui-btn-lift rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
         >
           {saving ? "Saving..." : "Save"}
         </button>
@@ -200,7 +200,7 @@ const Profile = () => {
       <button
         type="button"
         onClick={() => startEdit(section)}
-        className="inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium text-blue-600 hover:bg-blue-50"
+        className="ui-btn-lift inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium text-blue-600 hover:bg-blue-50"
       >
         <FaEdit size={13} />
         Edit
@@ -327,19 +327,19 @@ const Profile = () => {
                 />
               </div>
             </div>
-            <div className="md:col-span-2">
-              <label className="mb-1 block text-sm text-slate-500">
-                {isJobseeker ? "About me" : "Company overview"}
-              </label>
-              <textarea
-                rows={4}
-                disabled={!personalEditing}
-                {...register(isJobseeker ? "about" : "description", {
-                  maxLength: { value: 500, message: "Max 500 characters" },
-                })}
-                className={`${fieldClass(personalEditing)} resize-none`}
-              />
-            </div>
+            {isJobseeker && (
+              <div className="md:col-span-2">
+                <label className="mb-1 block text-sm text-slate-500">About me</label>
+                <textarea
+                  rows={4}
+                  disabled={!personalEditing}
+                  {...register("about", {
+                    maxLength: { value: 500, message: "Max 500 characters" },
+                  })}
+                  className={`${fieldClass(personalEditing)} resize-none`}
+                />
+              </div>
+            )}
           </div>
         </section>
 
@@ -432,7 +432,7 @@ const Profile = () => {
                       href={user.jobseeker.resume}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600"
+                      className="ui-btn-lift rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600"
                     >
                       View Resume
                     </a>
@@ -442,7 +442,7 @@ const Profile = () => {
                       type="button"
                       onClick={handleDeleteResume}
                       disabled={deletingResume}
-                      className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-medium text-rose-700 hover:bg-rose-100 disabled:opacity-60"
+                      className="ui-btn-lift rounded-lg border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-medium text-rose-700 hover:bg-rose-100 disabled:opacity-60"
                     >
                       {deletingResume ? "Deleting..." : "Delete"}
                     </button>
@@ -512,6 +512,19 @@ const Profile = () => {
                 {errors.website && (
                   <p className="mt-1 text-sm text-red-500">{errors.website.message}</p>
                 )}
+              </div>
+              <div className="md:col-span-2">
+                <label className="mb-1 block text-sm text-slate-500">
+                  Company overview
+                </label>
+                <textarea
+                  rows={4}
+                  disabled={!careerEditing}
+                  {...register("description", {
+                    maxLength: { value: 500, message: "Max 500 characters" },
+                  })}
+                  className={`${fieldClass(careerEditing)} resize-none`}
+                />
               </div>
             </div>
           )}

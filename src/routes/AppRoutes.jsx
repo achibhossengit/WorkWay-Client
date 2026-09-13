@@ -33,61 +33,66 @@ const AppRoutes = () => {
         <Route path="login" element={<Login />} />
         <Route path="register" element={<SignUp />} />
         <Route path="activate/:uid/:token" element={<Activation />} />
-        <Route path="password/reset/confirm/:uid/:token" element={<PasswordReset />} />
         <Route
-          path="dashboard"
-          element={
-            <PrivateRoutes>
-              <DashboardLayout />
-            </PrivateRoutes>
-          }
-        >
-          <Route index element={<Dashboard />} />
-          <Route path="profile" element={<Profile />} />
-          <Route path="applications" element={<Applications />} />
-          <Route path="reviews" element={<Reviews />} />
-          <Route
-            path="posted-jobs"
-            element={
-              <RoleRoute roles={["Employer"]}>
-                <PostedJobs />
-              </RoleRoute>
-            }
-          />
-          <Route
-            path="posted-jobs/:jobId/applications/:applicationId"
-            element={
-              <RoleRoute roles={["Employer"]}>
-                <ApplicationDetails />
-              </RoleRoute>
-            }
-          />
-          <Route
-            path="posted-jobs/:jobId/applications"
-            element={
-              <RoleRoute roles={["Employer"]}>
-                <JobApplications />
-              </RoleRoute>
-            }
-          />
-          <Route
-            path="posted-jobs/:jobId"
-            element={
-              <RoleRoute roles={["Employer"]}>
-                <PostedJobDetails />
-              </RoleRoute>
-            }
-          />
-          <Route
-            path="post-job/:jobId"
-            element={
-              <RoleRoute roles={["Employer"]}>
-                <PostJob />
-              </RoleRoute>
-            }
-          />
-        </Route>
+          path="password/reset/confirm/:uid/:token"
+          element={<PasswordReset />}
+        />
       </Route>
+
+      <Route
+        path="/dashboard"
+        element={
+          <PrivateRoutes>
+            <DashboardLayout />
+          </PrivateRoutes>
+        }
+      >
+        <Route index element={<Dashboard />} />
+        <Route path="profile" element={<Profile />} />
+        <Route path="applications" element={<Applications />} />
+        <Route path="reviews" element={<Reviews />} />
+        <Route
+          path="posted-jobs"
+          element={
+            <RoleRoute roles={["Employer"]}>
+              <PostedJobs />
+            </RoleRoute>
+          }
+        />
+        <Route
+          path="posted-jobs/:jobId/applications/:applicationId"
+          element={
+            <RoleRoute roles={["Employer"]}>
+              <ApplicationDetails />
+            </RoleRoute>
+          }
+        />
+        <Route
+          path="posted-jobs/:jobId/applications"
+          element={
+            <RoleRoute roles={["Employer"]}>
+              <JobApplications />
+            </RoleRoute>
+          }
+        />
+        <Route
+          path="posted-jobs/:jobId"
+          element={
+            <RoleRoute roles={["Employer"]}>
+              <PostedJobDetails />
+            </RoleRoute>
+          }
+        />
+        <Route
+          path="post-job/:jobId"
+          element={
+            <RoleRoute roles={["Employer"]}>
+              <PostJob />
+            </RoleRoute>
+          }
+        />
+      </Route>
+
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

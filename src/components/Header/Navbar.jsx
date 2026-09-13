@@ -1,31 +1,71 @@
-import { useContext, useState } from "react";
+import { useContext, useMemo } from "react";
 import {
   FaHome,
   FaBriefcase,
-  FaInfoCircle,
-  FaUser,
-  FaSignOutAlt,
   FaSignInAlt,
   FaUserPlus,
+  FaUserTie,
+  FaStar,
 } from "react-icons/fa";
-import { NavLink } from "react-router";
+import { Link, NavLink } from "react-router";
 import { AuthContext } from "../../context/authContext";
-import LogoutConfirmPopUp from "../Utilities/LogoutConfirmPopUp";
+import WorkWayLogo from "../Brand/WorkWayLogo";
 
-const links = [
-  { title: "Home", path: "/", icon: <FaHome /> },
+const baseLinks = [
+  { title: "Home", path: "/", icon: <FaHome />, end: true },
   { title: "Jobs", path: "/jobs", icon: <FaBriefcase /> },
-  { title: "About Us", path: "/about-us", icon: <FaInfoCircle /> },
 ];
 
-const userMenu = [
-  { title: "Dashboard", path: "/dashboard", icon: <FaHome /> },
-  { title: "Profile", path: "/dashboard/profile", icon: <FaUser /> },
-];
+const displayName = (user) => {
+  const fullName = [user?.first_name, user?.last_name]
+    .filter(Boolean)
+    .join(" ")
+    .trim();
+  return fullName || user?.username || "User";
+};
+
+const navLinkClass = ({ isActive }) =>
+  `flex items-center gap-2 rounded-lg px-3 py-2 transition-all duration-200 ${
+    isActive
+      ? "bg-blue-50 font-medium text-blue-600 shadow-sm"
+      : "text-gray-600 hover:bg-gray-100"
+  }`;
 
 const Navbar = () => {
-  const { user, loading, logout } = useContext(AuthContext);
-  const [isLogoutOpen, setIsLogoutOpen] = useState(false);
+  const { user, loading } = useContext(AuthContext);
+
+  const roleLinks = useMemo(() => {
+    if (!user) return [];
+    if (user.user_type === "Employer") {
+      return [
+        {
+          title: "Posted Jobs",
+          path: "/dashboard/posted-jobs",
+          icon: <FaBriefcase />,
+        },
+        {
+          title: "Applications",
+          path: "/dashboard/applications",
+          icon: <FaUserTie />,
+        },
+      ];
+    }
+    return [
+      {
+        title: "My Applications",
+        path: "/dashboard/applications",
+        icon: <FaUserTie />,
+      },
+      {
+        title: "Reviews",
+        path: "/dashboard/reviews",
+        icon: <FaStar />,
+      },
+    ];
+  }, [user]);
+
+  const navLinks = [...baseLinks, ...roleLinks];
+
   return (
     <div className="navbar bg-base-100 shadow-sm">
       <div className="navbar-start">
@@ -48,24 +88,24 @@ const Navbar = () => {
           </div>
           <ul
             tabIndex={0}
-            className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
+            className="menu menu-sm dropdown-content z-1 mt-3 w-52 rounded-box bg-base-100 p-2 shadow"
           >
-            {links.map((link, index) => (
-              <li key={index}>
-                <NavLink to={link.path} className="flex items-center gap-2">
+            {navLinks.map((link) => (
+              <li key={link.path}>
+                <NavLink to={link.path} end={link.end} className={navLinkClass}>
                   {link.icon} {link.title}
                 </NavLink>
               </li>
             ))}
           </ul>
         </div>
-        <a className="font-bold p-2 text-xl text-blue-600">WorkWay</a>
+        <WorkWayLogo />
       </div>
       <div className="navbar-center hidden lg:flex">
         <ul className="menu menu-horizontal px-1">
-          {links.map((link, index) => (
-            <li key={index}>
-              <NavLink to={link.path} className="flex items-center gap-2">
+          {navLinks.map((link) => (
+            <li key={link.path}>
+              <NavLink to={link.path} end={link.end} className={navLinkClass}>
                 {link.icon} {link.title}
               </NavLink>
             </li>
@@ -74,55 +114,40 @@ const Navbar = () => {
       </div>
       <div className="navbar-end">
         {loading ? (
-          <div className="skeleton h-10 w-10 shrink-0 rounded-full"></div>
+          <div className="skeleton h-10 w-28 shrink-0 rounded-full"></div>
         ) : user ? (
-          <div className="dropdown dropdown-end">
-            <div
-              tabIndex={0}
-              role="button"
-              className="btn btn-ghost btn-circle avatar"
-            >
-              <div className="w-10 rounded-full">
-                <img
-                  alt="User Avatar"
-                  src={
-                    user.profile_picture
-                      ? user.profile_picture
-                      : "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
-                  }
-                />
-              </div>
+          <Link
+            to="/dashboard"
+            className="flex items-center gap-2 rounded-full py-1 pl-3 pr-1 transition-all duration-200 hover:-translate-y-0.5 hover:bg-gray-100 hover:shadow-md"
+            title="Go to dashboard"
+          >
+            <span className="max-w-[8rem] truncate text-sm font-medium text-gray-800 sm:max-w-[12rem]">
+              {displayName(user)}
+            </span>
+            <div className="h-10 w-10 overflow-hidden rounded-full">
+              <img
+                alt=""
+                src={
+                  user.profile_picture
+                    ? user.profile_picture
+                    : "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
+                }
+                className="h-full w-full object-cover"
+              />
             </div>
-            <ul
-              tabIndex={0}
-              className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
-            >
-              {userMenu.map((item, index) => (
-                <li key={index}>
-                  <a href={item.path} className="flex items-center gap-2">
-                    {item.icon} {item.title}
-                  </a>
-                </li>
-              ))}
-              <li>
-                <button type="button" onClick={() => setIsLogoutOpen(true)}>
-                  <FaSignOutAlt /> Logout
-                </button>
-              </li>
-            </ul>
-          </div>
+          </Link>
         ) : (
           <div className="flex gap-4">
             <NavLink
               to="/register"
-              className="flex items-center btn px-4 py-2 rounded-lg font-medium text-blue-600 bg-white hover:bg-gray-50 transition-colors duration-200 shadow-sm hover:shadow-md border border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              className="btn ui-btn-lift flex items-center rounded-lg border border-blue-600 bg-white px-4 py-2 font-medium text-blue-600 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >
               <FaUserPlus className="mr-2" />
               Sign Up
             </NavLink>
             <NavLink
               to="/login"
-              className="flex items-center btn btn-primary px-4 py-2 rounded-lg font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200 shadow-sm hover:shadow-md border border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              className="btn btn-primary ui-btn-lift flex items-center rounded-lg border border-transparent bg-blue-600 px-4 py-2 font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >
               <FaSignInAlt className="mr-2" />
               Sign In
@@ -130,15 +155,6 @@ const Navbar = () => {
           </div>
         )}
       </div>
-
-      <LogoutConfirmPopUp
-        isOpen={isLogoutOpen}
-        onCancel={() => setIsLogoutOpen(false)}
-        onConfirm={() => {
-          setIsLogoutOpen(false);
-          logout();
-        }}
-      />
     </div>
   );
 };

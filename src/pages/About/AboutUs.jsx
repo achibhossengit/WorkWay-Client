@@ -135,7 +135,7 @@ const AboutUs = () => {
             {values.map((value) => (
               <div
                 key={value.title}
-                className="p-6 rounded-lg border border-gray-100 hover:shadow-md transition-shadow"
+                className="ui-card-lift rounded-lg border border-gray-100 p-6 shadow-sm"
               >
                 <div className="mb-4">{value.icon}</div>
                 <h3 className="text-xl font-semibold text-gray-800 mb-2">

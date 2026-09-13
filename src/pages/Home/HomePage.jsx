@@ -6,16 +6,11 @@ import FAQSection from "../../components/Home/FAQSection";
 import useJobsCategories from "../../hooks/useJobsCategories";
 
 const HomePage = () => {
-  const {
-    jobs,
-    categories,
-    loading,
-    handleSearch,
-  } = useJobsCategories();
+  const { jobs, loading } = useJobsCategories();
   return (
     <div>
-      <FilterSection categories={categories} handleSearch={handleSearch}/>
-      <HotJobSection jobs={jobs} loading={loading}/>
+      <FilterSection />
+      <HotJobSection jobs={jobs} loading={loading} />
       <ServicesSection />
       <ReviewsSection />
       <FAQSection />

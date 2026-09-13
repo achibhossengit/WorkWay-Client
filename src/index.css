@@ -2,3 +2,27 @@
 @plugin "daisyui" {
   themes: light --default;
 }
+
+@layer base {
+  a,
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  summary {
+    cursor: pointer;
+  }
+
+  a[aria-disabled="true"],
+  button:disabled,
+  [aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+}
+
+/* Shared lift hover — matches JobCard */
+@utility ui-card-lift {
+  @apply transition-all duration-200 hover:-translate-y-1 hover:border-blue-200 hover:shadow-lg;
+}
+
+@utility ui-btn-lift {
+  @apply transition-all duration-200 hover:-translate-y-1 hover:shadow-lg;
+}

@@ -36,7 +36,7 @@ const ServicesSection = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {services.map((service, index) => (
-            <div key={index} className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-100">
+            <div key={index} className="ui-card-lift rounded-lg border border-gray-100 bg-white p-6 shadow-sm">
               <div className="mb-4">
                 {service.icon}
               </div>

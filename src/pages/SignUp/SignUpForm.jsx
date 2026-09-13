@@ -227,11 +227,11 @@ const SignUpForm = ({ onSubmit, loading }) => {
 
         <button
           type="submit"
-          className={`w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-lg font-medium text-white ${
+          className={`ui-btn-lift flex w-full items-center justify-center rounded-lg border border-transparent px-4 py-3 text-lg font-medium text-white shadow-sm ${
             loading
-              ? "bg-gray-400 cursor-not-allowed"
+              ? "cursor-not-allowed bg-gray-400"
               : "bg-blue-600 hover:bg-blue-700"
-          } transition-colors duration-200`}
+          }`}
           disabled={loading}
         >
           {loading ? (

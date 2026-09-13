@@ -4,7 +4,9 @@ import { toast } from "react-toastify";
 import { AuthContext } from "../../context/authContext";
 import apiClient from "../../services/ApiClient";
 import Spinner from "../../components/Utilities/Spinner";
+import Pagination from "../../components/Utilities/Pagination";
 import PostJobModal from "../../components/Jobs/PostJobModal";
+import useClientPagination from "../../hooks/useClientPagination";
 import {
   formatDate,
   getJobType,
@@ -19,6 +21,8 @@ const PostedJobs = () => {
   const [isCreateOpen, setIsCreateOpen] = useState(
     searchParams.get("create") === "1"
   );
+  const { currentPage, totalPage, pageItems, handlePageChange } =
+    useClientPagination(jobs, 10);
 
   useEffect(() => {
     if (searchParams.get("create") === "1") {
@@ -59,7 +63,7 @@ const PostedJobs = () => {
         <button
           type="button"
           onClick={() => setIsCreateOpen(true)}
-          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          className="ui-btn-lift rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
         >
           Post Job
         </button>
@@ -78,52 +82,59 @@ const PostedJobs = () => {
           .
         </p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[560px] text-left text-sm">
-            <thead>
-              <tr className="border-b border-gray-200 text-slate-500">
-                <th className="pb-3 font-medium">Title</th>
-                <th className="pb-3 font-medium">Category</th>
-                <th className="pb-3 font-medium">Type</th>
-                <th className="pb-3 font-medium">Published</th>
-                <th className="pb-3 font-medium">Deadline</th>
-              </tr>
-            </thead>
-            <tbody>
-              {jobs.map((job) => (
-                <tr
-                  key={job.id}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => navigate(`/dashboard/posted-jobs/${job.id}`)}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter" || event.key === " ") {
-                      event.preventDefault();
-                      navigate(`/dashboard/posted-jobs/${job.id}`);
-                    }
-                  }}
-                  className="cursor-pointer border-b border-gray-100 last:border-0 transition-colors hover:bg-slate-50"
-                >
-                  <td className="py-4 font-medium text-gray-800">{job.title}</td>
-                  <td className="py-4 text-slate-600">
-                    {job.category?.title || "—"}
-                  </td>
-                  <td className="py-4 text-slate-600">
-                    {getJobType(job.details?.status)}
-                  </td>
-                  <td className="py-4 text-slate-600">
-                    {formatDate(job.published_at)}
-                  </td>
-                  <td className="py-4 text-slate-600">
-                    {job.details?.deadline
-                      ? formatDate(job.details.deadline)
-                      : "—"}
-                  </td>
+        <>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[560px] text-left text-sm">
+              <thead>
+                <tr className="border-b border-gray-200 text-slate-500">
+                  <th className="pb-3 font-medium">Title</th>
+                  <th className="pb-3 font-medium">Category</th>
+                  <th className="pb-3 font-medium">Type</th>
+                  <th className="pb-3 font-medium">Published</th>
+                  <th className="pb-3 font-medium">Deadline</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {pageItems.map((job) => (
+                  <tr
+                    key={job.id}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => navigate(`/dashboard/posted-jobs/${job.id}`)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        navigate(`/dashboard/posted-jobs/${job.id}`);
+                      }
+                    }}
+                    className="cursor-pointer border-b border-gray-100 last:border-0 transition-colors hover:bg-slate-50"
+                  >
+                    <td className="py-4 font-medium text-gray-800">{job.title}</td>
+                    <td className="py-4 text-slate-600">
+                      {job.category?.title || "—"}
+                    </td>
+                    <td className="py-4 text-slate-600">
+                      {getJobType(job.details?.status)}
+                    </td>
+                    <td className="py-4 text-slate-600">
+                      {formatDate(job.published_at)}
+                    </td>
+                    <td className="py-4 text-slate-600">
+                      {job.details?.deadline
+                        ? formatDate(job.details.deadline)
+                        : "—"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <Pagination
+            currentPage={currentPage}
+            totalPage={totalPage}
+            onPageChange={handlePageChange}
+          />
+        </>
       )}
 
       {isCreateOpen && (

@@ -11,7 +11,7 @@ const listFrom = (data) =>
 const StatCard = ({ label, value, to }) => (
   <Link
     to={to}
-    className="block rounded-xl border border-gray-200 bg-white p-5 shadow-md transition-colors hover:border-blue-200 hover:bg-slate-50"
+    className="ui-card-lift block rounded-xl border border-gray-200 bg-white p-5 shadow-sm"
   >
     <p className="text-sm font-medium text-slate-500">{label}</p>
     <p className="mt-2 text-3xl font-bold text-gray-800">{value}</p>

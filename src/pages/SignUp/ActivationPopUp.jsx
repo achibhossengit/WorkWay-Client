@@ -21,7 +21,7 @@ const ActivationPopUp = ({ isOpen, onShowEmail, onLogin }) => {
           <div className="flex justify-center gap-4">
             <button
               onClick={onShowEmail}
-              className="bg-blue-600 cursor-pointer text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700 transition duration-200"
+              className="ui-btn-lift rounded-lg bg-blue-600 px-4 py-2 text-white shadow-md hover:bg-blue-700"
             >
               Check Email
             </button>

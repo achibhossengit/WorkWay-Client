@@ -5,6 +5,8 @@ import apiClient from "../../services/ApiClient";
 import ReviewCard from "../../components/Reviews/ReviewCard";
 import StarRating from "../../components/Reviews/StarRating";
 import Spinner from "../../components/Utilities/Spinner";
+import Pagination from "../../components/Utilities/Pagination";
+import useClientPagination from "../../hooks/useClientPagination";
 
 const listFrom = (data) =>
   Array.isArray(data) ? data : data?.results || [];
@@ -30,6 +32,8 @@ const EmployerReviews = () => {
   const { user } = useContext(AuthContext);
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { currentPage, totalPage, pageItems, handlePageChange } =
+    useClientPagination(reviews, 10);
 
   useEffect(() => {
     const load = async () => {
@@ -61,11 +65,18 @@ const EmployerReviews = () => {
       {reviews.length === 0 ? (
         <p className="text-gray-500">No reviews yet.</p>
       ) : (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          {reviews.map((review) => (
-            <ReviewCard key={review.id} review={review} />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            {pageItems.map((review) => (
+              <ReviewCard key={review.id} review={review} />
+            ))}
+          </div>
+          <Pagination
+            currentPage={currentPage}
+            totalPage={totalPage}
+            onPageChange={handlePageChange}
+          />
+        </>
       )}
     </div>
   );
@@ -81,6 +92,8 @@ const JobseekerReviews = () => {
   const [employerId, setEmployerId] = useState("");
   const [ratings, setRatings] = useState(0);
   const [comment, setComment] = useState("");
+  const { currentPage, totalPage, pageItems, handlePageChange } =
+    useClientPagination(reviews, 10);
 
   const reviewedIds = useMemo(
     () => new Set(reviews.map((review) => review.employer)),
@@ -274,7 +287,7 @@ const JobseekerReviews = () => {
               <button
                 type="submit"
                 disabled={submitting}
-                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
+                className="ui-btn-lift rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
               >
                 {submitting
                   ? "Saving..."
@@ -304,17 +317,24 @@ const JobseekerReviews = () => {
         {reviews.length === 0 ? (
           <p className="text-gray-500">You have not reviewed any employer yet.</p>
         ) : (
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            {reviews.map((review) => (
-              <ReviewCard
-                key={review.id}
-                review={review}
-                onEdit={startEdit}
-                onDelete={handleDelete}
-                busy={submitting}
-              />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              {pageItems.map((review) => (
+                <ReviewCard
+                  key={review.id}
+                  review={review}
+                  onEdit={startEdit}
+                  onDelete={handleDelete}
+                  busy={submitting}
+                />
+              ))}
+            </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPage={totalPage}
+              onPageChange={handlePageChange}
+            />
+          </>
         )}
       </div>
     </div>

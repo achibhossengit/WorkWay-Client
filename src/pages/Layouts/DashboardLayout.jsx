@@ -1,35 +1,34 @@
 import { Outlet } from "react-router";
-
+import { ToastContainer } from "react-toastify";
 import { MdArrowBackIos, MdArrowForwardIos } from "react-icons/md";
 import Sidebar from "../../components/Footer/Sidebar";
 import { useState } from "react";
 
 const DashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
   return (
-    <div className="flex relative min-h-[90vh] bg-gray-50">
-      {/* Mobile sidebar toggle */}
+    <div className="relative flex min-h-screen bg-gray-50">
+      <ToastContainer />
       <button
-        className={`md:hidden absolute h-10 w-14 flex items-center justify-center rounded-r-lg bg-gray-200 ${
+        type="button"
+        className={`absolute z-50 flex h-10 w-14 items-center justify-center rounded-r-lg bg-gray-200 px-1 text-2xl text-blue-500 transition-transform duration-400 ease-in-out md:hidden ${
           sidebarOpen ? "-translate-x-full" : "translate-x-0"
-        } transform transition-transform duration-400 ease-in-out z-50 px-1 text-blue-500 text-2xl`}
+        }`}
         onClick={() => setSidebarOpen(!sidebarOpen)}
       >
         {sidebarOpen ? <MdArrowBackIos /> : <MdArrowForwardIos />}
       </button>
 
       <div
-        className={`${sidebarOpen ? "translate-x-0" : "-translate-x-full"} 
-        md:translate-x-0 transform transition-transform duration-400 ease-in-out
-        absolute md:static w-64 min-h-full bg-white z-40`}
+        className={`${sidebarOpen ? "translate-x-0" : "-translate-x-full"} absolute z-40 w-64 min-h-screen border-r border-gray-200 bg-white transition-transform duration-400 ease-in-out md:static md:translate-x-0`}
       >
         <Sidebar />
       </div>
 
-      {/* Main content */}
       <div
         onClick={() => setSidebarOpen(false)}
-        className="flex-1 overflow-auto p-6"
+        className="min-h-screen flex-1 overflow-auto p-6"
       >
         <Outlet />
       </div>

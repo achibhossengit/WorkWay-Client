@@ -1,8 +1,14 @@
 import { FiChevronDown, FiGrid, FiSearch } from "react-icons/fi";
 
-const Filter = ({ categories, handleSearch }) => {
+const Filter = ({
+  categories,
+  keyword,
+  category,
+  onKeywordChange,
+  onCategoryChange,
+}) => {
   return (
-    <form onSubmit={handleSearch} className="w-full">
+    <div className="w-full">
       <div className="rounded-2xl border border-gray-200/80 bg-white p-2 shadow-lg shadow-slate-900/10 sm:p-1.5">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-0">
           <label className="relative flex min-w-0 flex-1 items-center">
@@ -11,10 +17,12 @@ const Filter = ({ categories, handleSearch }) => {
             </span>
             <span className="sr-only">Job title, keywords, or company</span>
             <input
-              type="text"
-              name="keyword"
+              type="search"
+              value={keyword}
+              onChange={(event) => onKeywordChange(event.target.value)}
+              autoComplete="off"
               className="w-full rounded-xl border-0 bg-gray-50 py-3 pl-11 pr-4 text-sm text-gray-800 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/25 sm:rounded-lg sm:bg-transparent sm:focus:bg-transparent sm:focus:ring-0"
-              placeholder="Job title, keywords, or company"
+              placeholder="Search jobs by title, keyword, or company"
             />
           </label>
 
@@ -29,13 +37,14 @@ const Filter = ({ categories, handleSearch }) => {
             </span>
             <span className="sr-only">Category</span>
             <select
-              name="category"
+              value={category}
+              onChange={(event) => onCategoryChange(event.target.value)}
               className="w-full cursor-pointer appearance-none rounded-xl border-0 bg-gray-50 py-3 pl-11 pr-10 text-sm text-gray-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/25 sm:rounded-lg sm:bg-transparent sm:focus:bg-transparent sm:focus:ring-0"
             >
               <option value="">All Categories</option>
-              {categories.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.title}
+              {categories.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.title}
                 </option>
               ))}
             </select>
@@ -44,17 +53,9 @@ const Filter = ({ categories, handleSearch }) => {
               aria-hidden="true"
             />
           </label>
-
-          <button
-            type="submit"
-            className="inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors duration-200 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:ml-1.5"
-          >
-            <FiSearch className="h-4 w-4" aria-hidden="true" />
-            Search Jobs
-          </button>
         </div>
       </div>
-    </form>
+    </div>
   );
 };
 

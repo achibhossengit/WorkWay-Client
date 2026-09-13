@@ -194,7 +194,7 @@ const JobDetailsPage = () => {
                 type="button"
                 onClick={handleApply}
                 disabled={applying}
-                className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
+                className="ui-btn-lift rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
               >
                 {applying
                   ? "Applying..."
