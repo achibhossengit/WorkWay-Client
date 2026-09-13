@@ -2,50 +2,56 @@ import {
   FaHome,
   FaUserTie,
   FaBriefcase,
-  FaChartLine,
-  FaCog,
+  FaPlusCircle,
   FaSignOutAlt,
   FaUser,
 } from "react-icons/fa";
 import { useContext, useState } from "react";
-import { Link, useLocation } from "react-router";
+import { NavLink } from "react-router";
 import { AuthContext } from "../../context/authContext";
 import LogoutConfirmPopUp from "../Utilities/LogoutConfirmPopUp";
 
+const jobseekerNav = [
+  { title: "Dashboard", path: "/dashboard", icon: <FaHome /> },
+  { title: "Profile", path: "/dashboard/profile", icon: <FaUser /> },
+  { title: "My Applications", path: "/dashboard/applications", icon: <FaUserTie /> },
+];
+
+const employerNav = [
+  { title: "Dashboard", path: "/dashboard", icon: <FaHome /> },
+  { title: "Profile", path: "/dashboard/profile", icon: <FaUser /> },
+  { title: "Posted Jobs", path: "/dashboard/posted-jobs", icon: <FaBriefcase /> },
+  { title: "Post Job", path: "/dashboard/post-job", icon: <FaPlusCircle /> },
+  { title: "Applications", path: "/dashboard/applications", icon: <FaUserTie /> },
+];
+
 const Sidebar = () => {
-  const location = useLocation();
-  const { logout } = useContext(AuthContext);
+  const { user, logout } = useContext(AuthContext);
   const [isLogoutOpen, setIsLogoutOpen] = useState(false);
 
-  const currentPath = location.pathname.split("/").pop();
+  const navItems =
+    user?.user_type === "Employer" ? employerNav : jobseekerNav;
 
-  // Sidebar navigation items
-  const navItems = [
-    { title: "Dashboard", link: "", icon: <FaHome /> },
-    { title: "Profile", link: "profile", icon: <FaUser /> },
-    { title: "Posted Jobs", link: "posted-jobs", icon: <FaBriefcase /> },
-    { title: "Applications", link: "applications", icon: <FaUserTie /> },
-    { title: "Analytics", link: "analytics", icon: <FaChartLine /> },
-  ];
   return (
     <div>
       <nav>
         <ul className="mt-8 space-y-2 px-4">
           {navItems.map((item) => (
-            <li key={item.title}>
-              <Link
-                to={item.link}
-                className={`flex items-center px-4 py-3 rounded-lg transition-colors
-                    ${
-                      currentPath === item.link ||
-                      (currentPath === "dashboard" && item.link == "")
-                        ? "bg-blue-50 text-blue-600 font-medium"
-                        : "text-gray-600 hover:bg-gray-100"
-                    }`}
+            <li key={item.path}>
+              <NavLink
+                to={item.path}
+                end={item.path === "/dashboard"}
+                className={({ isActive }) =>
+                  `flex items-center px-4 py-3 rounded-lg transition-colors ${
+                    isActive
+                      ? "bg-blue-50 text-blue-600 font-medium"
+                      : "text-gray-600 hover:bg-gray-100"
+                  }`
+                }
               >
                 <span className="mr-3 text-lg">{item.icon}</span>
                 <span>{item.title}</span>
-              </Link>
+              </NavLink>
             </li>
           ))}
         </ul>

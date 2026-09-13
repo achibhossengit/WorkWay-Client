@@ -12,6 +12,10 @@ import PrivateRoutes from "./PrivateRoutes";
 import Activation from "../pages/SignUp/Activation";
 import PasswordReset from "../pages/SignIn/PasswordReset";
 import AboutUs from "../pages/About/AboutUs";
+import RoleRoute from "./RoleRoute";
+import Applications from "../pages/DashBoard/Applications";
+import PostedJobs from "../pages/DashBoard/PostedJobs";
+import PostJob from "../pages/DashBoard/PostJob";
 
 const AppRoutes = () => {
   return (
@@ -34,6 +38,23 @@ const AppRoutes = () => {
         >
           <Route index element={<Dashboard />} />
           <Route path="profile" element={<Profile />} />
+          <Route path="applications" element={<Applications />} />
+          <Route
+            path="posted-jobs"
+            element={
+              <RoleRoute roles={["Employer"]}>
+                <PostedJobs />
+              </RoleRoute>
+            }
+          />
+          <Route
+            path="post-job"
+            element={
+              <RoleRoute roles={["Employer"]}>
+                <PostJob />
+              </RoleRoute>
+            }
+          />
         </Route>
       </Route>
       <Route path="*" element={<NotFound />} />
