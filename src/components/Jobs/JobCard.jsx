@@ -36,6 +36,11 @@ const JobCard = ({ job, hasApplied = false }) => {
 
       <div className="flex-1 space-y-2 text-sm">
         <div className="flex flex-wrap gap-2">
+          {job.is_featured && (
+            <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800">
+              Featured
+            </span>
+          )}
           {hasApplied && (
             <span className="rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
               Applied

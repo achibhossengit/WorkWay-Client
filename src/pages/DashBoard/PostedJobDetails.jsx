@@ -5,6 +5,11 @@ import { AuthContext } from "../../context/authContext";
 import apiClient from "../../services/ApiClient";
 import Spinner from "../../components/Utilities/Spinner";
 import JobDetailsView from "../../components/Jobs/JobDetailsView";
+import {
+  FEATURED_PRICE_LABEL,
+  featuredUntilLabel,
+  isJobFeatured,
+} from "../../components/Payments/paymentUtils";
 
 const PostedJobDetails = () => {
   const { jobId } = useParams();
@@ -13,6 +18,7 @@ const PostedJobDetails = () => {
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
+  const [featuring, setFeaturing] = useState(false);
 
   useEffect(() => {
     const loadJob = async () => {
@@ -39,6 +45,28 @@ const PostedJobDetails = () => {
 
     loadJob();
   }, [jobId, user?.username, navigate]);
+
+  const handleFeature = async () => {
+    setFeaturing(true);
+    try {
+      const res = await apiClient.post("payments/init/", { job_id: job.id });
+      if (res.data?.gateway_url) {
+        window.location.assign(res.data.gateway_url);
+        return;
+      }
+      toast.error("Payment gateway URL was missing.");
+    } catch (error) {
+      const data = error.response?.data;
+      toast.error(
+        data?.detail?.[0] ||
+          data?.detail ||
+          data?.non_field_errors?.[0] ||
+          "Could not start featured payment."
+      );
+    } finally {
+      setFeaturing(false);
+    }
+  };
 
   const handleDelete = async () => {
     if (!window.confirm(`Delete "${job.title}"? This cannot be undone.`)) {
@@ -72,6 +100,22 @@ const PostedJobDetails = () => {
       <JobDetailsView job={job} />
 
       <div className="mt-8 flex flex-wrap justify-end gap-3 border-t border-gray-200 pt-4">
+        {isJobFeatured(job) ? (
+          <span className="self-center text-sm font-medium text-amber-700">
+            Featured until {featuredUntilLabel(job)}
+          </span>
+        ) : (
+          <button
+            type="button"
+            onClick={handleFeature}
+            disabled={featuring}
+            className="ui-btn-lift rounded-lg bg-amber-500 px-6 py-2.5 text-sm font-medium text-white hover:bg-amber-600 disabled:opacity-60"
+          >
+            {featuring
+              ? "Redirecting..."
+              : `Feature this job (${FEATURED_PRICE_LABEL})`}
+          </button>
+        )}
         <button
           type="button"
           onClick={() => navigate(`/dashboard/posted-jobs/${job.id}/applications`)}

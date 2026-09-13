@@ -35,6 +35,9 @@ const JobDetailsView = ({ job, application }) => {
         </div>
         <div className="flex flex-col items-start gap-2 sm:items-end">
           <span className="badge badge-primary">{job.category?.title}</span>
+          {job.is_featured && (
+            <span className="badge badge-warning">Featured</span>
+          )}
           <div className="badge badge-outline">
             {getJobType(job.details?.status)}
           </div>

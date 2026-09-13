@@ -4,6 +4,7 @@ import {
   FaBriefcase,
   FaSignOutAlt,
   FaStar,
+  FaCreditCard,
 } from "react-icons/fa";
 import { useContext, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router";
@@ -22,6 +23,7 @@ const employerNav = [
   { title: "Posted Jobs", path: "/dashboard/posted-jobs", icon: <FaBriefcase /> },
   { title: "Applications", path: "/dashboard/applications", icon: <FaUserTie /> },
   { title: "Reviews", path: "/dashboard/reviews", icon: <FaStar /> },
+  { title: "Payments", path: "/dashboard/payments", icon: <FaCreditCard /> },
 ];
 
 const displayName = (user) => {

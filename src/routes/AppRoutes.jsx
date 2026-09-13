@@ -21,6 +21,8 @@ import JobApplications from "../pages/DashBoard/JobApplications";
 import ApplicationDetails from "../pages/DashBoard/ApplicationDetails";
 import PostJob from "../pages/DashBoard/PostJob";
 import Reviews from "../pages/DashBoard/Reviews";
+import PaymentHistory from "../pages/DashBoard/PaymentHistory";
+import PaymentResult from "../pages/DashBoard/PaymentResult";
 
 const AppRoutes = () => {
   return (
@@ -88,6 +90,38 @@ const AppRoutes = () => {
           element={
             <RoleRoute roles={["Employer"]}>
               <PostJob />
+            </RoleRoute>
+          }
+        />
+        <Route
+          path="payments"
+          element={
+            <RoleRoute roles={["Employer"]}>
+              <PaymentHistory />
+            </RoleRoute>
+          }
+        />
+        <Route
+          path="payments/success"
+          element={
+            <RoleRoute roles={["Employer"]}>
+              <PaymentResult kind="success" />
+            </RoleRoute>
+          }
+        />
+        <Route
+          path="payments/fail"
+          element={
+            <RoleRoute roles={["Employer"]}>
+              <PaymentResult kind="fail" />
+            </RoleRoute>
+          }
+        />
+        <Route
+          path="payments/cancel"
+          element={
+            <RoleRoute roles={["Employer"]}>
+              <PaymentResult kind="cancel" />
             </RoleRoute>
           }
         />

@@ -123,7 +123,7 @@ const EmployerDashboard = ({ user }) => {
       <p className="mb-6 text-sm text-gray-500">
         A quick look at your hiring activity.
       </p>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatCard
           label="Posted jobs"
           value={stats.jobs}
@@ -133,6 +133,11 @@ const EmployerDashboard = ({ user }) => {
           label="New applications"
           value={stats.newApplications}
           to="/dashboard/applications"
+        />
+        <StatCard
+          label="Payments"
+          value="History"
+          to="/dashboard/payments"
         />
       </div>
     </div>

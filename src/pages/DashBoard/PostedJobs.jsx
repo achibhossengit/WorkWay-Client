@@ -13,6 +13,7 @@ import {
   formatDate,
   getJobType,
 } from "../../components/Utilities/UtilityFunctions";
+import { isJobFeatured } from "../../components/Payments/paymentUtils";
 
 const PostedJobs = () => {
   const { user } = useContext(AuthContext);
@@ -104,6 +105,7 @@ const PostedJobs = () => {
               <thead>
                 <tr className="border-b border-gray-200 text-slate-500">
                   <th className="pb-3 font-medium">Title</th>
+                  <th className="pb-3 font-medium">Visibility</th>
                   <th className="pb-3 font-medium">Category</th>
                   <th className="pb-3 font-medium">Type</th>
                   <th className="pb-3 font-medium">Published</th>
@@ -126,6 +128,15 @@ const PostedJobs = () => {
                     className="cursor-pointer border-b border-gray-100 last:border-0 transition-colors hover:bg-slate-50"
                   >
                     <td className="py-4 font-medium text-gray-800">{job.title}</td>
+                    <td className="py-4">
+                      {isJobFeatured(job) ? (
+                        <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800">
+                          Featured
+                        </span>
+                      ) : (
+                        <span className="text-slate-500">Standard</span>
+                      )}
+                    </td>
                     <td className="py-4 text-slate-600">
                       {job.category?.title || "—"}
                     </td>
