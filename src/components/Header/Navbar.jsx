@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import {
   FaHome,
   FaBriefcase,
@@ -10,6 +10,7 @@ import {
 } from "react-icons/fa";
 import { NavLink } from "react-router";
 import { AuthContext } from "../../context/authContext";
+import LogoutConfirmPopUp from "../Utilities/LogoutConfirmPopUp";
 
 const links = [
   { title: "Home", path: "/", icon: <FaHome /> },
@@ -24,6 +25,7 @@ const userMenu = [
 
 const Navbar = () => {
   const { user, loading, logout } = useContext(AuthContext);
+  const [isLogoutOpen, setIsLogoutOpen] = useState(false);
   return (
     <div className="navbar bg-base-100 shadow-sm">
       <div className="navbar-start">
@@ -103,7 +105,7 @@ const Navbar = () => {
                 </li>
               ))}
               <li>
-                <button onClick={logout}>
+                <button type="button" onClick={() => setIsLogoutOpen(true)}>
                   <FaSignOutAlt /> Logout
                 </button>
               </li>
@@ -128,6 +130,15 @@ const Navbar = () => {
           </div>
         )}
       </div>
+
+      <LogoutConfirmPopUp
+        isOpen={isLogoutOpen}
+        onCancel={() => setIsLogoutOpen(false)}
+        onConfirm={() => {
+          setIsLogoutOpen(false);
+          logout();
+        }}
+      />
     </div>
   );
 };

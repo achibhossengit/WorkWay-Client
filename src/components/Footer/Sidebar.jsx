@@ -7,10 +7,15 @@ import {
   FaSignOutAlt,
   FaUser,
 } from "react-icons/fa";
+import { useContext, useState } from "react";
 import { Link, useLocation } from "react-router";
+import { AuthContext } from "../../context/authContext";
+import LogoutConfirmPopUp from "../Utilities/LogoutConfirmPopUp";
 
 const Sidebar = () => {
   const location = useLocation();
+  const { logout } = useContext(AuthContext);
+  const [isLogoutOpen, setIsLogoutOpen] = useState(false);
 
   const currentPath = location.pathname.split("/").pop();
 
@@ -47,11 +52,24 @@ const Sidebar = () => {
       </nav>
 
       <div className="absolute bottom-0 w-full p-4 border-t border-gray-200">
-        <button className="flex items-center w-full px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-lg">
+        <button
+          type="button"
+          onClick={() => setIsLogoutOpen(true)}
+          className="flex items-center w-full px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-lg"
+        >
           <FaSignOutAlt className="mr-3 text-lg" />
           <span>Logout</span>
         </button>
       </div>
+
+      <LogoutConfirmPopUp
+        isOpen={isLogoutOpen}
+        onCancel={() => setIsLogoutOpen(false)}
+        onConfirm={() => {
+          setIsLogoutOpen(false);
+          logout();
+        }}
+      />
     </div>
   );
 };
