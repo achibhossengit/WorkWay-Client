@@ -29,20 +29,22 @@ const MyApplications = () => {
   const [jobLoading, setJobLoading] = useState(false);
   const [cancelling, setCancelling] = useState(false);
 
-  const loadApplications = async () => {
-    if (!user?.id) return;
-    setLoading(true);
-    try {
-      const res = await apiClient.get(`jobseekers/${user.id}/applications/`);
-      setApplications(Array.isArray(res.data) ? res.data : res.data.results || []);
-    } catch {
-      toast.error("Could not load your applications.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const loadApplications = async () => {
+      if (!user?.id) return;
+      setLoading(true);
+      try {
+        const res = await apiClient.get(`jobseekers/${user.id}/applications/`);
+        setApplications(
+          Array.isArray(res.data) ? res.data : res.data.results || []
+        );
+      } catch {
+        toast.error("Could not load your applications.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
     loadApplications();
   }, [user?.id]);
 
