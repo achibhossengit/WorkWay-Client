@@ -6,6 +6,7 @@ import { AuthContext } from "../../context/authContext";
 import apiClient from "../../services/ApiClient";
 import Spinner from "../../components/Utilities/Spinner";
 import JobDetailsView from "../../components/Jobs/JobDetailsView";
+import { isDeadlinePassed } from "../../components/Utilities/UtilityFunctions";
 
 const listFrom = (data) =>
   Array.isArray(data) ? data : data?.results || [];
@@ -52,11 +53,13 @@ const JobDetailsPage = () => {
 
   const isEmployer = user?.user_type === "Employer";
   const isCancelled = application?.status === "C";
-  const canCancel = Boolean(application) && !isCancelled;
-  const hasApplied = canCancel;
+  const hasApplied = Boolean(application) && !isCancelled;
+  const canCancel = hasApplied;
+  const deadlinePassed = isDeadlinePassed(job?.details?.deadline);
+  const canApply = !isEmployer && !hasApplied && !deadlinePassed;
   const hasResume = Boolean(user?.jobseeker?.resume);
   const needsResumeUpload =
-    user?.user_type === "Jobseeker" && !hasResume && !hasApplied;
+    user?.user_type === "Jobseeker" && !hasResume && canApply;
 
   const uploadResumeIfNeeded = async () => {
     if (hasResume) return true;
@@ -78,6 +81,10 @@ const JobDetailsPage = () => {
     }
     if (user.user_type !== "Jobseeker") {
       toast.error("Only job seekers can apply.");
+      return;
+    }
+    if (deadlinePassed) {
+      toast.error("The application deadline has passed.");
       return;
     }
 
@@ -144,6 +151,12 @@ const JobDetailsPage = () => {
         <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-md sm:p-8">
           <JobDetailsView job={job} application={application} />
 
+          {deadlinePassed && !hasApplied && (
+            <p className="mt-4 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+              The application deadline has passed. New applications are closed.
+            </p>
+          )}
+
           {needsResumeUpload && (
             <div className="mt-6 rounded-lg border border-amber-200 bg-amber-50 p-4">
               <p className="mb-3 text-sm font-medium text-amber-900">
@@ -166,7 +179,7 @@ const JobDetailsPage = () => {
             </div>
           )}
 
-          <div className="mt-8 flex flex-wrap justify-end gap-3 border-t border-gray-200 pt-4">
+          <div className="mt-8 flex flex-wrap items-center justify-end gap-3 border-t border-gray-200 pt-4">
             {canCancel ? (
               <button
                 type="button"
@@ -176,21 +189,28 @@ const JobDetailsPage = () => {
               >
                 {cancelling ? "Cancelling..." : "Cancel application"}
               </button>
+            ) : canApply ? (
+              <button
+                type="button"
+                onClick={handleApply}
+                disabled={applying}
+                className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
+              >
+                {applying
+                  ? "Applying..."
+                  : application?.status === "C"
+                    ? "Re-apply"
+                    : "Apply Now"}
+              </button>
             ) : (
-              !isEmployer && (
+              !isEmployer &&
+              deadlinePassed && (
                 <button
                   type="button"
-                  onClick={handleApply}
-                  disabled={applying || hasApplied}
-                  className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
+                  disabled
+                  className="rounded-lg bg-slate-400 px-6 py-2.5 text-sm font-medium text-white opacity-80"
                 >
-                  {hasApplied
-                    ? "Applied"
-                    : applying
-                      ? "Applying..."
-                      : application?.status === "C"
-                        ? "Re-apply"
-                        : "Apply Now"}
+                  Deadline passed
                 </button>
               )
             )}
