@@ -192,7 +192,7 @@ The client is deployed on **Vercel**.
 1. Push this repo to GitHub and import it in Vercel (Framework Preset: **Vite**).
 2. Set environment variable:
    - `VITE_API_BASE_URL=https://work-way.vercel.app/api/v1/`
-3. Deploy. Output directory is `dist` (Vite default). After the project is linked, Vercel redeploys automatically on each GitHub commit.
+3. Deploy. Output directory is `dist` (Vite default). `vercel.json` rewrites every path to `index.html` so React Router URLs (`/jobs`, `/dashboard/...`, payment callbacks) work on refresh and external redirects. After the project is linked, Vercel redeploys automatically on each GitHub commit.
 4. Confirm the live app: https://workway-client.vercel.app/
 5. On the API, allow this origin in `CORS_ALLOWED_ORIGINS` and set `EMAIL_FRONTEND_DOMAIN` / `SSL_FRONTEND_URL` to the client domain.
 
