@@ -13,10 +13,9 @@ import apiClient from "../../services/ApiClient";
 import Spinner from "../../components/Utilities/Spinner";
 import { formatDate } from "../../components/Utilities/UtilityFunctions";
 import {
-  NEXT_STATUS,
   STATUS_LABELS,
-  STATUS_STYLES,
   applicantName,
+  statusOptionsFor,
 } from "../../components/Applications/applicationStatus";
 
 const ApplicationDetails = () => {
@@ -82,7 +81,7 @@ const ApplicationDetails = () => {
 
   const applicant = application.applicant || {};
   const name = applicantName(applicant);
-  const nextStatus = NEXT_STATUS[application.status];
+  const statusOptions = statusOptionsFor(application.status);
   const skills = Array.isArray(applicant.skills)
     ? applicant.skills
     : String(applicant.skills || "")
@@ -90,44 +89,64 @@ const ApplicationDetails = () => {
         .map((skill) => skill.trim())
         .filter(Boolean);
 
+  const handleStatusSelect = (event) => {
+    const status = event.target.value;
+    if (!status || status === application.status) return;
+    handleStatusChange(status);
+  };
+
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-md">
-      <Link
-        to={`/dashboard/posted-jobs/${jobId}/applications`}
-        className="mb-6 inline-block text-sm font-medium text-blue-600 hover:underline"
-      >
-        ← Back to applications
-      </Link>
-
-      <div className="mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row">
-        <div className="flex items-start gap-4">
-          {applicant.profile_picture ? (
-            <img
-              src={applicant.profile_picture}
-              alt={name}
-              className="h-16 w-16 rounded-full object-cover"
-            />
-          ) : (
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-xl font-semibold text-blue-700">
-              {name.charAt(0).toUpperCase()}
-            </div>
-          )}
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">{name}</h1>
-            <p className="text-sm text-gray-500">@{applicant.username}</p>
-            <p className="mt-1 text-sm text-gray-600">
-              Applied for {job?.title || application.job_title} •{" "}
-              {formatDate(application.applied_at)}
-            </p>
-          </div>
-        </div>
-        <span
-          className={`rounded-full px-3 py-1 text-xs font-medium ${
-            STATUS_STYLES[application.status] || "bg-slate-100 text-slate-700"
-          }`}
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <Link
+          to={`/dashboard/posted-jobs/${jobId}/applications`}
+          className="text-sm font-medium text-blue-600 hover:underline"
         >
-          {STATUS_LABELS[application.status] || application.status}
-        </span>
+          ← Back to applications
+        </Link>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <label className="flex items-center gap-2 text-sm text-gray-600">
+            <span className="font-medium text-gray-700">Status</span>
+            <select
+              value={application.status}
+              onChange={handleStatusSelect}
+              disabled={updating || statusOptions.length === 0}
+              className="min-w-[11rem] rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm font-medium text-gray-800 disabled:opacity-60"
+            >
+              <option value={application.status}>
+                {STATUS_LABELS[application.status] || application.status}
+              </option>
+              {statusOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div className="mb-6 flex items-start gap-4">
+        {applicant.profile_picture ? (
+          <img
+            src={applicant.profile_picture}
+            alt={name}
+            className="h-16 w-16 rounded-full object-cover"
+          />
+        ) : (
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-xl font-semibold text-blue-700">
+            {name.charAt(0).toUpperCase()}
+          </div>
+        )}
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">{name}</h1>
+          <p className="text-sm text-gray-500">@{applicant.username}</p>
+          <p className="mt-1 text-sm text-gray-600">
+            Applied for {job?.title || application.job_title} •{" "}
+            {formatDate(application.applied_at)}
+          </p>
+        </div>
       </div>
 
       <div className="mb-8 grid grid-cols-1 gap-4 rounded-lg bg-gray-50 p-4 md:grid-cols-2">
@@ -194,7 +213,7 @@ const ApplicationDetails = () => {
         </div>
       )}
 
-      <div className="flex flex-wrap justify-end gap-3 border-t border-gray-200 pt-4">
+      <div className="flex justify-end border-t border-gray-200 pt-4">
         {applicant.resume ? (
           <a
             href={applicant.resume}
@@ -207,18 +226,6 @@ const ApplicationDetails = () => {
           </a>
         ) : (
           <span className="px-2 py-2.5 text-sm text-gray-400">No resume</span>
-        )}
-        {nextStatus && (
-          <button
-            type="button"
-            onClick={() => handleStatusChange(nextStatus)}
-            disabled={updating}
-            className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
-          >
-            {updating
-              ? "Updating..."
-              : `Mark as ${STATUS_LABELS[nextStatus]}`}
-          </button>
         )}
       </div>
     </div>

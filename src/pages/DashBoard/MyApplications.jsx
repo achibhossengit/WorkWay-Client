@@ -10,6 +10,7 @@ const STATUS_LABELS = {
   P: "Pending",
   R: "Reviewed",
   A: "Accept",
+  X: "Rejected",
   C: "Cancelled",
 };
 
@@ -17,7 +18,8 @@ const STATUS_STYLES = {
   P: "bg-amber-100 text-amber-800",
   R: "bg-blue-100 text-blue-800",
   A: "bg-green-100 text-green-800",
-  C: "bg-rose-100 text-rose-800",
+  X: "bg-rose-100 text-rose-800",
+  C: "bg-slate-100 text-slate-600",
 };
 
 const MyApplications = () => {

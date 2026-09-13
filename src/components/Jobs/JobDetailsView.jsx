@@ -16,6 +16,7 @@ const STATUS_LABELS = {
   P: "Pending",
   R: "Reviewed",
   A: "Accept",
+  X: "Rejected",
   C: "Cancelled",
 };
 
