@@ -1,32 +1,31 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import apiClient, { setUnauthorizedHandler } from "../services/ApiClient";
+
+const getTokensFromLocalStorage = () => {
+  const storedTokens = localStorage.getItem("authTokens");
+  return storedTokens ? JSON.parse(storedTokens) : null;
+};
 
 const useAuth = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [tokens, setTokens] = useState(getTokensFromLocalStorage);
 
-  // Helper Functions
-  const getTokensFromLocalStorage = () => {
-    const storedTokens = localStorage.getItem("authTokens");
-    return storedTokens ? JSON.parse(storedTokens) : null;
-  };
+  const setTokensInLocalStorage = useCallback((newTokens) => {
+    localStorage.setItem("authTokens", JSON.stringify(newTokens));
+    setTokens(newTokens);
+  }, []);
 
-  const [tokens, setTokens] = useState(getTokensFromLocalStorage());
-
-  const setTokensInLocalStorage = (tokens) => {
-    localStorage.setItem("authTokens", JSON.stringify(tokens));
-    setTokens(tokens);
-  };
-
-  const removeTokensFromLocalStorage = () => {
+  const logout = useCallback(() => {
     localStorage.removeItem("authTokens");
     setTokens(null);
-  };
+    setUser(null);
+  }, []);
 
-  // Fetch user data using access token
-  const fetchUser = async (accessToken = tokens?.access) => {
+  const fetchUser = useCallback(async (accessToken) => {
+    const token = accessToken ?? tokens?.access;
     setLoading(true);
-    if (!accessToken) {
+    if (!token) {
       setLoading(false);
       return;
     }
@@ -39,16 +38,14 @@ const useAuth = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [tokens?.access]);
 
-  // Login and store tokens
   const login = async (credentials) => {
     setLoading(true);
     try {
       const res = await apiClient.post("auth/jwt/create", credentials);
       const { access, refresh } = res.data;
 
-      // Store tokens and fetch user data
       const newTokens = { access, refresh };
       setTokensInLocalStorage(newTokens);
 
@@ -62,21 +59,14 @@ const useAuth = () => {
     }
   };
 
-  // Logout and clear all auth data
-  const logout = () => {
-    removeTokensFromLocalStorage();
-    setUser(null);
-  };
-
   useEffect(() => {
     setUnauthorizedHandler(logout);
     return () => setUnauthorizedHandler(null);
-  }, []);
+  }, [logout]);
 
-  // Check user on initial load
   useEffect(() => {
     fetchUser();
-  }, [tokens]);
+  }, [fetchUser]);
 
   return {
     user,
