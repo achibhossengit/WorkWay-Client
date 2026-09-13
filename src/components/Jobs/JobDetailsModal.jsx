@@ -1,6 +1,7 @@
 import { useContext, useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
+import { FaFileAlt } from "react-icons/fa";
 import { AuthContext } from "../../context/authContext";
 import apiClient from "../../services/ApiClient";
 import JobDetailsView from "./JobDetailsView";
@@ -13,14 +14,31 @@ const JobDetailsModal = ({
   onReapplyApplication,
   cancelling,
 }) => {
-  const { user } = useContext(AuthContext);
+  const { user, fetchUser } = useContext(AuthContext);
   const navigate = useNavigate();
   const [applying, setApplying] = useState(false);
   const [applied, setApplied] = useState(false);
+  const [resumeFile, setResumeFile] = useState(null);
   const isEmployer = user?.user_type === "Employer";
   const isCancelled = application?.status === "C";
   const canCancel = Boolean(application) && !isCancelled;
   const hasApplied = canCancel || applied;
+  const hasResume = Boolean(user?.jobseeker?.resume);
+  const needsResumeUpload =
+    user?.user_type === "Jobseeker" && !hasResume && !hasApplied;
+
+  const uploadResumeIfNeeded = async () => {
+    if (hasResume) return true;
+    if (!resumeFile) {
+      toast.error("Upload a resume to apply for this job.");
+      return false;
+    }
+    const formData = new FormData();
+    formData.append("resume", resumeFile);
+    await apiClient.patch(`jobseekers/${user.id}/`, formData);
+    await fetchUser();
+    return true;
+  };
 
   const handleApply = async () => {
     if (!user) {
@@ -30,6 +48,9 @@ const JobDetailsModal = ({
 
     setApplying(true);
     try {
+      const ready = await uploadResumeIfNeeded();
+      if (!ready) return;
+
       const res = await apiClient.post(`jobseekers/${user.id}/applications/`, {
         job: job.id,
       });
@@ -59,6 +80,28 @@ const JobDetailsModal = ({
       <div className="modal-box max-w-4xl overflow-hidden p-0">
         <div className="p-8">
           <JobDetailsView job={job} application={application} />
+
+          {needsResumeUpload && (
+            <div className="mt-6 rounded-lg border border-amber-200 bg-amber-50 p-4">
+              <p className="mb-3 text-sm font-medium text-amber-900">
+                A resume is required to apply. Upload one to continue.
+              </p>
+              <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-amber-300 bg-white px-4 py-3 hover:border-amber-400">
+                <FaFileAlt className="text-amber-700" />
+                <span className="text-sm text-slate-700">
+                  {resumeFile?.name || "Choose resume (PDF, JPG, or PNG)"}
+                </span>
+                <input
+                  type="file"
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  className="hidden"
+                  onChange={(event) =>
+                    setResumeFile(event.target.files?.[0] || null)
+                  }
+                />
+              </label>
+            </div>
+          )}
 
           <div className="mt-8 flex justify-end gap-3 border-t border-gray-200 pt-4">
             <button

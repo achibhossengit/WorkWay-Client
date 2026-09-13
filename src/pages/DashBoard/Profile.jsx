@@ -56,7 +56,7 @@ const fieldClass = (enabled) =>
 const Profile = () => {
   const { user, fetchUser } = useContext(AuthContext);
   const [editingSection, setEditingSection] = useState(null);
-  const [saving, setSaving] = useState(false);
+  const [deletingResume, setDeletingResume] = useState(false);
 
   const {
     register,
@@ -94,6 +94,24 @@ const Profile = () => {
   const cancelEdit = () => {
     reset(getDefaults(user));
     setEditingSection(null);
+  };
+
+  const handleDeleteResume = async () => {
+    if (!user?.id || !user.jobseeker?.resume) return;
+    if (!window.confirm("Delete your resume?")) return;
+
+    setDeletingResume(true);
+    try {
+      const formData = new FormData();
+      formData.append("clear_resume", "true");
+      await apiClient.patch(`jobseekers/${user.id}/`, formData);
+      await fetchUser();
+      toast.success("Resume deleted.");
+    } catch {
+      toast.error("Could not delete resume.");
+    } finally {
+      setDeletingResume(false);
+    }
   };
 
   const onSubmit = async (data) => {
@@ -408,7 +426,7 @@ const Profile = () => {
 
               <div>
                 <label className="mb-2 block text-sm text-slate-500">Resume</label>
-                <div className="flex flex-wrap items-center gap-4">
+                <div className="flex flex-wrap items-center gap-3">
                   {user.jobseeker?.resume && (
                     <a
                       href={user.jobseeker.resume}
@@ -418,6 +436,16 @@ const Profile = () => {
                     >
                       View Resume
                     </a>
+                  )}
+                  {user.jobseeker?.resume && (
+                    <button
+                      type="button"
+                      onClick={handleDeleteResume}
+                      disabled={deletingResume}
+                      className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-medium text-rose-700 hover:bg-rose-100 disabled:opacity-60"
+                    >
+                      {deletingResume ? "Deleting..." : "Delete"}
+                    </button>
                   )}
                   {careerEditing ? (
                     <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-3 hover:border-blue-400">

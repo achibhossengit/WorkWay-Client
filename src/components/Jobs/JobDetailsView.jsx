@@ -113,6 +113,20 @@ const JobDetailsView = ({ job, application }) => {
         </div>
       </div>
 
+      <div className="mb-8">
+        <h2 className="mb-3 text-lg font-semibold text-gray-800">
+          How to apply
+        </h2>
+        <ol className="list-decimal space-y-2 pl-5 text-gray-700">
+          <li>Sign in with a job seeker account.</li>
+          <li>
+            Make sure your profile has a resume. If you do not have one yet, you
+            will be asked to upload it when you apply.
+          </li>
+          <li>Click Apply Now to submit your application for this job.</li>
+        </ol>
+      </div>
+
       <div>
         <h2 className="mb-3 text-lg font-semibold text-gray-800">
           Requirements
