@@ -85,7 +85,7 @@ apiClient.interceptors.response.use(
         throw error;
       }
 
-      const { data } = await refreshClient.post("auth/jwt/refresh", {
+      const { data } = await refreshClient.post("auth/jwt/refresh/", {
         refresh: tokens.refresh,
       });
 
