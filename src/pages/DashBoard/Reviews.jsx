@@ -9,26 +9,21 @@ import Spinner from "../../components/Utilities/Spinner";
 const listFrom = (data) =>
   Array.isArray(data) ? data : data?.results || [];
 
-const uniqueEmployersFromJobs = (jobs) => {
+const FINISHED_STATUSES = new Set(["A", "X"]);
+
+const employersFromFinishedApplications = (applications) => {
   const byId = new Map();
-  jobs.forEach((job) => {
-    const employer = job.employer;
-    if (employer?.id && !byId.has(employer.id)) {
-      byId.set(employer.id, employer);
-    }
+  applications.forEach((application) => {
+    if (!FINISHED_STATUSES.has(application.status)) return;
+    const id = application.employer_id;
+    if (!id || byId.has(id)) return;
+    byId.set(id, {
+      id,
+      company: application.employer_company,
+      username: application.employer_username,
+    });
   });
   return [...byId.values()];
-};
-
-const fetchAllJobs = async () => {
-  const jobs = [];
-  for (let page = 1; page <= 20; page += 1) {
-    const res = await apiClient.get(`jobs/?page=${page}`);
-    const pageJobs = listFrom(res.data);
-    jobs.push(...pageJobs);
-    if (!res.data?.next || pageJobs.length === 0) break;
-  }
-  return jobs;
 };
 
 const EmployerReviews = () => {
@@ -59,7 +54,8 @@ const EmployerReviews = () => {
     <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-md">
       <h1 className="mb-2 text-2xl font-bold text-gray-800">Reviews</h1>
       <p className="mb-6 text-sm text-gray-500">
-        Job seekers can rate your company. You can only read these reviews.
+        Job seekers can rate your company after an application is finished. You
+        can only read these reviews.
       </p>
 
       {reviews.length === 0 ? (
@@ -81,6 +77,7 @@ const JobseekerReviews = () => {
   const [employers, setEmployers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [editingId, setEditingId] = useState(null);
   const [employerId, setEmployerId] = useState("");
   const [ratings, setRatings] = useState(0);
   const [comment, setComment] = useState("");
@@ -94,17 +91,21 @@ const JobseekerReviews = () => {
     (employer) => !reviewedIds.has(employer.id)
   );
 
+  const editingReview = reviews.find((review) => review.id === editingId);
+
   useEffect(() => {
     const load = async () => {
       if (!user?.id) return;
       setLoading(true);
       try {
-        const [reviewsRes, jobs] = await Promise.all([
+        const [reviewsRes, appsRes] = await Promise.all([
           apiClient.get(`jobseekers/${user.id}/reviews/`),
-          fetchAllJobs(),
+          apiClient.get(`jobseekers/${user.id}/applications/`),
         ]);
         setReviews(listFrom(reviewsRes.data));
-        setEmployers(uniqueEmployersFromJobs(jobs));
+        setEmployers(
+          employersFromFinishedApplications(listFrom(appsRes.data))
+        );
       } catch {
         toast.error("Could not load reviews.");
       } finally {
@@ -116,14 +117,38 @@ const JobseekerReviews = () => {
   }, [user?.id]);
 
   const resetForm = () => {
+    setEditingId(null);
     setEmployerId("");
     setRatings(0);
     setComment("");
   };
 
+  const startEdit = (review) => {
+    setEditingId(review.id);
+    setEmployerId(String(review.employer));
+    setRatings(review.ratings || 0);
+    setComment(review.comment || "");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleDelete = async (review) => {
+    if (!window.confirm("Delete this review?")) return;
+    setSubmitting(true);
+    try {
+      await apiClient.delete(`jobseekers/${user.id}/reviews/${review.id}/`);
+      setReviews((current) => current.filter((item) => item.id !== review.id));
+      if (editingId === review.id) resetForm();
+      toast.success("Review deleted.");
+    } catch {
+      toast.error("Could not delete this review.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
-    if (!employerId) {
+    if (!editingId && !employerId) {
       toast.error("Select an employer to review.");
       return;
     }
@@ -134,20 +159,38 @@ const JobseekerReviews = () => {
 
     setSubmitting(true);
     try {
-      const res = await apiClient.post(`jobseekers/${user.id}/reviews/`, {
-        employer: Number(employerId),
-        ratings,
-        comment: comment.trim(),
-      });
-      setReviews((current) => [res.data, ...current]);
-      resetForm();
-      toast.success("Review submitted.");
+      if (editingId) {
+        const res = await apiClient.patch(
+          `jobseekers/${user.id}/reviews/${editingId}/`,
+          {
+            ratings,
+            comment: comment.trim(),
+          }
+        );
+        setReviews((current) =>
+          current.map((review) =>
+            review.id === editingId ? { ...review, ...res.data } : review
+          )
+        );
+        resetForm();
+        toast.success("Review updated.");
+      } else {
+        const res = await apiClient.post(`jobseekers/${user.id}/reviews/`, {
+          employer: Number(employerId),
+          ratings,
+          comment: comment.trim(),
+        });
+        setReviews((current) => [res.data, ...current]);
+        resetForm();
+        toast.success("Review submitted.");
+      }
     } catch (error) {
       const data = error.response?.data;
       const message =
         data?.non_field_errors?.[0] ||
+        (Array.isArray(data) && data[0]) ||
         data?.detail ||
-        "Could not submit this review.";
+        "Could not save this review.";
       toast.error(message);
     } finally {
       setSubmitting(false);
@@ -156,17 +199,23 @@ const JobseekerReviews = () => {
 
   if (loading) return <Spinner title="Loading reviews..." />;
 
+  const showCreateForm = !editingId && availableEmployers.length > 0;
+  const showEditForm = Boolean(editingId);
+
   return (
     <div className="space-y-6">
       <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-md">
         <h1 className="mb-2 text-2xl font-bold text-gray-800">Reviews</h1>
         <p className="mb-6 text-sm text-gray-500">
-          Rate an employer. Each employer can be reviewed once.
+          You can review an employer only after an application is accepted or
+          rejected. One review per employer.
         </p>
 
-        {availableEmployers.length === 0 ? (
+        {!showCreateForm && !showEditForm ? (
           <p className="text-gray-500">
-            You have already reviewed every employer with a posted job.
+            {employers.length === 0
+              ? "No finished applications yet. Reviews unlock when an application is accepted or rejected."
+              : "You have already reviewed every eligible employer."}
           </p>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -174,18 +223,31 @@ const JobseekerReviews = () => {
               <span className="mb-1 block text-sm font-medium text-gray-700">
                 Employer
               </span>
-              <select
-                value={employerId}
-                onChange={(event) => setEmployerId(event.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-              >
-                <option value="">Select an employer</option>
-                {availableEmployers.map((employer) => (
-                  <option key={employer.id} value={employer.id}>
-                    {employer.company || employer.username}
-                  </option>
-                ))}
-              </select>
+              {showEditForm ? (
+                <input
+                  type="text"
+                  disabled
+                  value={
+                    editingReview?.employer_company ||
+                    editingReview?.employer_username ||
+                    "Employer"
+                  }
+                  className="w-full rounded-lg border border-gray-300 bg-slate-50 px-3 py-2 text-sm text-gray-600"
+                />
+              ) : (
+                <select
+                  value={employerId}
+                  onChange={(event) => setEmployerId(event.target.value)}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                >
+                  <option value="">Select an employer</option>
+                  {availableEmployers.map((employer) => (
+                    <option key={employer.id} value={employer.id}>
+                      {employer.company || employer.username}
+                    </option>
+                  ))}
+                </select>
+              )}
             </label>
 
             <div>
@@ -208,13 +270,29 @@ const JobseekerReviews = () => {
               />
             </label>
 
-            <button
-              type="submit"
-              disabled={submitting}
-              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
-            >
-              {submitting ? "Submitting..." : "Submit review"}
-            </button>
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="submit"
+                disabled={submitting}
+                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
+              >
+                {submitting
+                  ? "Saving..."
+                  : showEditForm
+                    ? "Update review"
+                    : "Submit review"}
+              </button>
+              {showEditForm && (
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  disabled={submitting}
+                  className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-60"
+                >
+                  Cancel
+                </button>
+              )}
+            </div>
           </form>
         )}
       </div>
@@ -228,7 +306,13 @@ const JobseekerReviews = () => {
         ) : (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             {reviews.map((review) => (
-              <ReviewCard key={review.id} review={review} />
+              <ReviewCard
+                key={review.id}
+                review={review}
+                onEdit={startEdit}
+                onDelete={handleDelete}
+                busy={submitting}
+              />
             ))}
           </div>
         )}
