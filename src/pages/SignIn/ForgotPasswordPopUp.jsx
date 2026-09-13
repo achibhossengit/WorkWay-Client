@@ -42,14 +42,14 @@ const ForgotPasswordPopUp = ({ isModalOpen, setIsModalOpen }) => {
 
   return (
     <div
-      className="fixed inset-0 flex items-center justify-center backdrop-brightness-50 backdrop-blur-sm z-50"
+      className="fixed inset-0 z-50 flex items-end justify-center overflow-y-auto p-4 backdrop-blur-sm backdrop-brightness-50 sm:items-center"
       aria-hidden={!isModalOpen}
     >
-      <div className="relative bg-white rounded-lg shadow-2xl max-w-md w-full p-6">
+      <div className="relative my-auto max-h-[90dvh] w-full max-w-md overflow-y-auto rounded-lg bg-white p-6 shadow-2xl">
         {/* Close Button */}
         <button
           onClick={() => setIsModalOpen(false)}
-          className="absolute cursor-pointer top-2 right-2 text-gray-400 hover:text-gray-600 transition"
+          className="absolute right-2 top-2 cursor-pointer text-gray-400 transition hover:text-gray-600"
         >
           <FaTimes size={20} />
         </button>

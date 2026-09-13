@@ -1,28 +1,59 @@
-import { useContext, useState } from "react";
-import { useNavigate } from "react-router";
+import { useContext, useEffect, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router";
 import { toast } from "react-toastify";
 import { FaFileAlt } from "react-icons/fa";
 import { AuthContext } from "../../context/authContext";
 import apiClient from "../../services/ApiClient";
-import JobDetailsView from "./JobDetailsView";
+import Spinner from "../../components/Utilities/Spinner";
+import JobDetailsView from "../../components/Jobs/JobDetailsView";
 
-const JobDetailsModal = ({
-  job,
-  setIsModalOpen,
-  application,
-  onCancelApplication,
-  onReapplyApplication,
-  cancelling,
-}) => {
+const listFrom = (data) =>
+  Array.isArray(data) ? data : data?.results || [];
+
+const JobDetailsPage = () => {
+  const { jobId } = useParams();
   const { user, fetchUser } = useContext(AuthContext);
   const navigate = useNavigate();
+  const [job, setJob] = useState(null);
+  const [application, setApplication] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [applying, setApplying] = useState(false);
-  const [applied, setApplied] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
   const [resumeFile, setResumeFile] = useState(null);
+
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true);
+      try {
+        const jobRes = await apiClient.get(`jobs/${jobId}/`);
+        setJob(jobRes.data);
+
+        if (user?.user_type === "Jobseeker" && user?.id) {
+          const appsRes = await apiClient.get(
+            `jobseekers/${user.id}/applications/`
+          );
+          const match = listFrom(appsRes.data).find(
+            (app) => String(app.job) === String(jobId)
+          );
+          setApplication(match || null);
+        } else {
+          setApplication(null);
+        }
+      } catch {
+        toast.error("Could not load this job.");
+        navigate("/jobs");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    load();
+  }, [jobId, user?.id, user?.user_type, navigate]);
+
   const isEmployer = user?.user_type === "Employer";
   const isCancelled = application?.status === "C";
   const canCancel = Boolean(application) && !isCancelled;
-  const hasApplied = canCancel || applied;
+  const hasApplied = canCancel;
   const hasResume = Boolean(user?.jobseeker?.resume);
   const needsResumeUpload =
     user?.user_type === "Jobseeker" && !hasResume && !hasApplied;
@@ -45,6 +76,10 @@ const JobDetailsModal = ({
       navigate("/login");
       return;
     }
+    if (user.user_type !== "Jobseeker") {
+      toast.error("Only job seekers can apply.");
+      return;
+    }
 
     setApplying(true);
     try {
@@ -52,10 +87,10 @@ const JobDetailsModal = ({
       if (!ready) return;
 
       const res = await apiClient.post(`jobseekers/${user.id}/applications/`, {
-        job: job.id,
+        job: Number(jobId),
       });
-      setApplied(true);
-      onReapplyApplication?.(res.data);
+      setApplication(res.data);
+      setResumeFile(null);
       toast.success("Application submitted successfully.");
     } catch (error) {
       const data = error.response?.data;
@@ -72,13 +107,41 @@ const JobDetailsModal = ({
     }
   };
 
+  const handleCancel = async () => {
+    if (!application?.id) return;
+    if (!window.confirm("Cancel this application?")) return;
+
+    setCancelling(true);
+    try {
+      const res = await apiClient.patch(
+        `jobseekers/${user.id}/applications/${application.id}/`,
+        { status: "C" }
+      );
+      setApplication((current) => ({ ...current, ...res.data, status: "C" }));
+      toast.success("Application cancelled.");
+    } catch {
+      toast.error("Could not cancel this application.");
+    } finally {
+      setCancelling(false);
+    }
+  };
+
+  if (loading) return <Spinner title="Loading job details..." />;
+  if (!job) return null;
+
   return (
-    <dialog
-      open
-      className="modal modal-bottom backdrop-blur-sm sm:modal-middle"
-    >
-      <div className="modal-box max-w-4xl overflow-hidden p-0">
-        <div className="p-8">
+    <div className="bg-gray-50 py-8 sm:py-10">
+      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-4">
+          <Link
+            to="/jobs"
+            className="text-sm font-medium text-blue-600 hover:underline"
+          >
+            ← Back to jobs
+          </Link>
+        </div>
+
+        <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-md sm:p-8">
           <JobDetailsView job={job} application={application} />
 
           {needsResumeUpload && (
@@ -87,8 +150,8 @@ const JobDetailsModal = ({
                 A resume is required to apply. Upload one to continue.
               </p>
               <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-amber-300 bg-white px-4 py-3 hover:border-amber-400">
-                <FaFileAlt className="text-amber-700" />
-                <span className="text-sm text-slate-700">
+                <FaFileAlt className="shrink-0 text-amber-700" />
+                <span className="min-w-0 truncate text-sm text-slate-700">
                   {resumeFile?.name || "Choose resume (PDF, JPG, or PNG)"}
                 </span>
                 <input
@@ -103,19 +166,13 @@ const JobDetailsModal = ({
             </div>
           )}
 
-          <div className="mt-8 flex justify-end gap-3 border-t border-gray-200 pt-4">
-            <button
-              onClick={() => setIsModalOpen(false)}
-              className="btn btn-outline px-6 hover:bg-gray-100"
-            >
-              Close
-            </button>
+          <div className="mt-8 flex flex-wrap justify-end gap-3 border-t border-gray-200 pt-4">
             {canCancel ? (
               <button
                 type="button"
-                onClick={() => onCancelApplication?.(application.id)}
+                onClick={handleCancel}
                 disabled={cancelling}
-                className="btn border-red-600 bg-red-600 px-6 text-white hover:bg-red-700 disabled:opacity-60"
+                className="rounded-lg border border-red-600 bg-red-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-60"
               >
                 {cancelling ? "Cancelling..." : "Cancel application"}
               </button>
@@ -125,21 +182,23 @@ const JobDetailsModal = ({
                   type="button"
                   onClick={handleApply}
                   disabled={applying || hasApplied}
-                  className="btn btn-primary bg-blue-600 px-6 text-white hover:bg-blue-700 disabled:opacity-60"
+                  className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
                 >
                   {hasApplied
                     ? "Applied"
                     : applying
                       ? "Applying..."
-                      : "Apply Now"}
+                      : application?.status === "C"
+                        ? "Re-apply"
+                        : "Apply Now"}
                 </button>
               )
             )}
           </div>
         </div>
       </div>
-    </dialog>
+    </div>
   );
 };
 
-export default JobDetailsModal;
+export default JobDetailsPage;

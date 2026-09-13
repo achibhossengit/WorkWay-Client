@@ -2,6 +2,7 @@ import MainLayout from "../pages/Layouts/MainLayout";
 import { Route, Routes } from "react-router";
 import NotFound from "../components/Utilities/NotFound";
 import JobsPage from "../pages/Jobs/JobsPage";
+import JobDetailsPage from "../pages/Jobs/JobDetailsPage";
 import HomePage from "../pages/Home/HomePage";
 import Login from "../pages/SignIn/SignIn";
 import SignUp from "../pages/SignUp/SignUp";
@@ -27,6 +28,7 @@ const AppRoutes = () => {
       <Route path="/" element={<MainLayout />}>
         <Route index element={<HomePage />} />
         <Route path="jobs" element={<JobsPage />} />
+        <Route path="jobs/:jobId" element={<JobDetailsPage />} />
         <Route path="about-us" element={<AboutUs />} />
         <Route path="login" element={<Login />} />
         <Route path="register" element={<SignUp />} />

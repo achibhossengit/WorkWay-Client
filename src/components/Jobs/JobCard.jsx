@@ -1,25 +1,24 @@
-import { useState } from "react";
+import { Link } from "react-router";
 import {
   FaBuilding,
   FaMapMarkerAlt,
   FaBriefcase,
   FaMoneyBillWave,
 } from "react-icons/fa";
-import JobDetailsModal from "./JobDetailsModal";
 import { formatSalary, getJobType } from "../Utilities/UtilityFunctions";
 
 const JobCard = ({ job }) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow p-5">
-      <div className="flex items-start gap-3 mb-3">
-        <div className="bg-blue-100 p-3 rounded-lg">
-          <FaBuilding className="text-blue-600 text-xl" />
+    <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
+      <div className="mb-3 flex items-start gap-3">
+        <div className="rounded-lg bg-blue-100 p-3">
+          <FaBuilding className="text-xl text-blue-600" />
         </div>
         <div>
-          <h3 className="font-bold text-lg text-gray-800">{job.title}</h3>
-          <p className="text-gray-600">{job.employer.username}</p>
+          <h3 className="text-lg font-bold text-gray-800">{job.title}</h3>
+          <p className="text-gray-600">
+            {job.employer?.company || job.employer?.username}
+          </p>
         </div>
       </div>
 
@@ -38,20 +37,12 @@ const JobCard = ({ job }) => {
         </div>
       </div>
 
-      <button
-        className="mt-4 w-full cursor-pointer py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
-        onClick={() => setIsModalOpen(true)}
+      <Link
+        to={`/jobs/${job.id}`}
+        className="mt-4 block w-full rounded-md bg-blue-600 py-2 text-center text-white transition-colors hover:bg-blue-700"
       >
         View Details
-      </button>
-
-      {/* Modal */}
-      {isModalOpen && (
-        <JobDetailsModal
-          job={job}
-          setIsModalOpen={setIsModalOpen}
-        ></JobDetailsModal>
-      )}
+      </Link>
     </div>
   );
 };

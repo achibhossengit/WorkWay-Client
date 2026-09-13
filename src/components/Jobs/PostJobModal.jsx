@@ -57,10 +57,10 @@ const PostJobModal = ({ onClose, onCreated }) => {
   return (
     <dialog
       open
-      className="modal modal-bottom backdrop-blur-sm sm:modal-middle"
+      className="modal modal-open modal-bottom backdrop-blur-sm sm:modal-middle"
     >
-      <div className="modal-box max-h-[90vh] max-w-4xl overflow-y-auto p-0">
-        <div className="p-8">
+      <div className="modal-box flex max-h-[90dvh] w-11/12 max-w-4xl flex-col overflow-hidden p-0 sm:w-full">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4 sm:p-8">
           <h2 className="mb-1 text-2xl font-bold text-gray-800">Post Job</h2>
           <p className="mb-6 text-sm text-gray-500">
             Publish a new job. It will appear on the public /jobs page.
@@ -79,6 +79,11 @@ const PostJobModal = ({ onClose, onCreated }) => {
           )}
         </div>
       </div>
+      <form method="dialog" className="modal-backdrop">
+        <button type="submit" onClick={onClose}>
+          close
+        </button>
+      </form>
     </dialog>
   );
 };

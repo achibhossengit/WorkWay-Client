@@ -1,10 +1,10 @@
 import { useContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
 import { AuthContext } from "../../context/authContext";
 import apiClient from "../../services/ApiClient";
 import Spinner from "../../components/Utilities/Spinner";
 import { formatDate } from "../../components/Utilities/UtilityFunctions";
-import JobDetailsModal from "../../components/Jobs/JobDetailsModal";
 
 const STATUS_LABELS = {
   P: "Pending",
@@ -24,12 +24,9 @@ const STATUS_STYLES = {
 
 const MyApplications = () => {
   const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedApplication, setSelectedApplication] = useState(null);
-  const [selectedJob, setSelectedJob] = useState(null);
-  const [jobLoading, setJobLoading] = useState(false);
-  const [cancelling, setCancelling] = useState(false);
 
   useEffect(() => {
     const loadApplications = async () => {
@@ -49,66 +46,6 @@ const MyApplications = () => {
 
     loadApplications();
   }, [user?.id]);
-
-  const closeModal = () => {
-    setSelectedApplication(null);
-    setSelectedJob(null);
-  };
-
-  const openJobDetails = async (application) => {
-    setSelectedApplication(application);
-    setSelectedJob(null);
-    setJobLoading(true);
-    try {
-      const res = await apiClient.get(`jobs/${application.job}/`);
-      setSelectedJob(res.data);
-    } catch {
-      toast.error("Could not load job details.");
-      closeModal();
-    } finally {
-      setJobLoading(false);
-    }
-  };
-
-  const handleReapply = (updatedApplication) => {
-    setApplications((current) =>
-      current.map((application) =>
-        application.id === updatedApplication.id
-          ? { ...application, ...updatedApplication }
-          : application
-      )
-    );
-    setSelectedApplication((current) =>
-      current?.id === updatedApplication.id
-        ? { ...current, ...updatedApplication }
-        : current
-    );
-  };
-
-  const handleCancel = async (applicationId) => {
-    if (!window.confirm("Cancel this application?")) return;
-
-    setCancelling(true);
-    try {
-      await apiClient.patch(
-        `jobseekers/${user.id}/applications/${applicationId}/`,
-        { status: "C" }
-      );
-      setApplications((current) =>
-        current.map((application) =>
-          application.id === applicationId
-            ? { ...application, status: "C" }
-            : application
-        )
-      );
-      closeModal();
-      toast.success("Application cancelled.");
-    } catch {
-      toast.error("Could not cancel this application.");
-    } finally {
-      setCancelling(false);
-    }
-  };
 
   if (loading) return <Spinner title="Loading applications..." />;
 
@@ -134,11 +71,11 @@ const MyApplications = () => {
                   key={application.id}
                   role="button"
                   tabIndex={0}
-                  onClick={() => openJobDetails(application)}
+                  onClick={() => navigate(`/jobs/${application.job}`)}
                   onKeyDown={(event) => {
                     if (event.key === "Enter" || event.key === " ") {
                       event.preventDefault();
-                      openJobDetails(application);
+                      navigate(`/jobs/${application.job}`);
                     }
                   }}
                   className="cursor-pointer border-b border-gray-100 last:border-0 transition-colors hover:bg-slate-50"
@@ -164,23 +101,6 @@ const MyApplications = () => {
             </tbody>
           </table>
         </div>
-      )}
-
-      {selectedApplication && jobLoading && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm">
-          <Spinner title="Loading job details..." />
-        </div>
-      )}
-
-      {selectedApplication && selectedJob && (
-        <JobDetailsModal
-          job={selectedJob}
-          setIsModalOpen={closeModal}
-          application={selectedApplication}
-          onCancelApplication={handleCancel}
-          onReapplyApplication={handleReapply}
-          cancelling={cancelling}
-        />
       )}
     </div>
   );
