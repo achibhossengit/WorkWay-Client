@@ -1,3 +1,6 @@
+import { useContext, useState } from "react";
+import { useNavigate } from "react-router";
+import { toast } from "react-toastify";
 import {
   FaBriefcase,
   FaMapMarkerAlt,
@@ -11,8 +14,43 @@ import {
   getJobType,
   getWorkplace,
 } from "../Utilities/UtilityFunctions";
+import { AuthContext } from "../../context/authContext";
+import apiClient from "../../services/ApiClient";
 
 const JobDetailsModal = ({ job, setIsModalOpen }) => {
+  const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const [applying, setApplying] = useState(false);
+  const [applied, setApplied] = useState(false);
+  const isEmployer = user?.user_type === "Employer";
+
+  const handleApply = async () => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+
+    setApplying(true);
+    try {
+      await apiClient.post(`jobseekers/${user.id}/applications/`, {
+        job: job.id,
+      });
+      setApplied(true);
+      toast.success("Application submitted successfully.");
+    } catch (error) {
+      const data = error.response?.data;
+      const message =
+        (Array.isArray(data) && data[0]) ||
+        data?.non_field_errors?.[0] ||
+        (typeof data === "string" && data) ||
+        data?.detail ||
+        data?.job?.[0] ||
+        "Could not apply for this job.";
+      toast.error(message);
+    } finally {
+      setApplying(false);
+    }
+  };
   return (
     <dialog
       open
@@ -138,9 +176,16 @@ const JobDetailsModal = ({ job, setIsModalOpen }) => {
             >
               Close
             </button>
-            <button className="btn btn-primary px-6 bg-blue-600 hover:bg-blue-700 text-white">
-              Apply Now
-            </button>
+            {!isEmployer && (
+              <button
+                type="button"
+                onClick={handleApply}
+                disabled={applying || applied}
+                className="btn btn-primary px-6 bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-60"
+              >
+                {applied ? "Applied" : applying ? "Applying..." : "Apply Now"}
+              </button>
+            )}
           </div>
         </div>
       </div>
